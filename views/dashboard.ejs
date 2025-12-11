@@ -1,0 +1,41 @@
+<%- include('partials/header', { title: 'Dashboard' }) %>
+
+<h2 class="mb-3">Your gift lists</h2>
+
+<form class="row g-3 mb-4" method="POST" action="/lists">
+  <div class="col-md-8">
+    <input name="title" class="form-control" placeholder="New list title" required>
+  </div>
+  <div class="col-md-4">
+    <button class="btn btn-success w-100">Create list</button>
+  </div>
+</form>
+
+<% if (lists.length === 0) { %>
+  <p>No lists yet. Start by creating one.</p>
+<% } else { %>
+  <div class="list-group">
+    <% lists.forEach(list => { %>
+      <div class="list-group-item d-flex justify-content-between align-items-center">
+        <div>
+          <a href="/lists/<%= list.id %>"><strong><%= list.title %></strong></a><br>
+          <% if (list.share_token) { %>
+            <small>Share link: /share/<%= list.share_token %></small>
+          <% } else { %>
+            <small>No share link yet</small>
+          <% } %>
+        </div>
+        <div class="d-flex gap-2">
+          <form method="POST" action="/lists/<%= list.id %>/share">
+            <button class="btn btn-outline-primary btn-sm">Share</button>
+          </form>
+          <form method="POST" action="/lists/<%= list.id %>/delete" onsubmit="return confirm('Delete this list?');">
+            <button class="btn btn-outline-danger btn-sm">Delete</button>
+          </form>
+        </div>
+      </div>
+    <% }) %>
+  </div>
+<% } %>
+
+<%- include('partials/footer') %>

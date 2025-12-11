@@ -1,0 +1,52 @@
+<%- include('partials/header', { title: list.title }) %>
+
+<h2 class="mb-3">Edit list: <%= list.title %></h2>
+
+<form class="row g-3 mb-4" method="POST" action="/lists/<%= list.id %>/edit">
+  <div class="col-md-8">
+    <input name="title" class="form-control" value="<%= list.title %>" required>
+  </div>
+  <div class="col-md-4">
+    <button class="btn btn-primary w-100">Update title</button>
+  </div>
+</form>
+
+<h4>Items</h4>
+
+<form class="row g-3 mb-3" method="POST" action="/lists/<%= list.id %>/items/add">
+  <div class="col-md-8">
+    <input name="item_name" class="form-control" placeholder="Add new item" required>
+  </div>
+  <div class="col-md-4">
+    <button class="btn btn-success w-100">Add item</button>
+  </div>
+</form>
+
+<% if (items.length === 0) { %>
+  <p>No items yet.</p>
+<% } else { %>
+  <ul class="list-group">
+    <% items.forEach(item => { %>
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <span><%= item.item_name %></span>
+        <form method="POST" action="/items/<%= item.id %>/delete">
+          <button class="btn btn-sm btn-outline-danger">Delete</button>
+        </form>
+      </li>
+    <% }) %>
+  </ul>
+<% } %>
+
+<hr>
+
+<form method="POST" action="/lists/<%= list.id %>/share">
+  <button class="btn btn-outline-primary">Generate / refresh share link</button>
+</form>
+
+<% if (list.share_token) { %>
+  <p class="mt-2">
+    Public share link: <code>/share/<%= list.share_token %></code>
+  </p>
+<% } %>
+
+<%- include('partials/footer') %>
