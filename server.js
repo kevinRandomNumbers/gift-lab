@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const path = require('path');
+// const session = require('express-session');
 
 const app = express();
 
@@ -14,6 +15,11 @@ const JWT_EXPIRES_IN = "2h";
 // Middleware
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+// app.use(session({
+//   secret: 'super-secret-key-change-this',
+//   resave: false,
+//   saveUninitialized: false
+// }));
 
 // Views
 app.set('view engine', 'ejs');
@@ -69,7 +75,7 @@ db.serialize(() => {
   `);
 
   // Seed users
-  const adminPass = bcrypt.hashSync("56yTDv!!SQWxcez&&2S", 10);
+  const adminPass = bcrypt.hashSync("pass", 10);
   const jeremyPass = bcrypt.hashSync("cheesecake",10);
 
   db.run(`INSERT INTO users (username, password_hash) VALUES (?, ?)`, ["admin", adminPass]);
@@ -91,7 +97,7 @@ db.serialize(() => {
 app.get('/', (req, res) => {
   // const token = req.cookies.token;
   // if (!token) return res.redirect('/login');
-  return res.redirect('/dashboard');
+  return res.redirect('/login');
 });
 
 /* LOGIN */
@@ -102,6 +108,7 @@ app.get('/login', (req, res) => {
 
 app.post('/login', (req, res) => {
   const { username, password } = req.body;
+  console.log(username, password)
 
   db.get(`SELECT * FROM users WHERE username = ?`, [username], (err, user) => {
     if (err) return res.status(500).send("Internal error.");
@@ -110,21 +117,29 @@ app.post('/login', (req, res) => {
       return res.redirect('/login');
     }
 
-    const token = jwt.sign(
-      { id: user.id, username: user.username },
-      JWT_SECRET,
-      { expiresIn: JWT_EXPIRES_IN }
-    );
-
-    // insecure on purpose for labs
-    res.cookie("token", token, {
-      httpOnly: false,
-      secure: false,
-      sameSite: "Lax"
-    });
-
+            res.cookie("user_id", user.id, {
+                httpOnly: true,
+                sameSite: "lax",
+                path: "/"
+            });
     res.redirect('/dashboard');
   });
+});
+
+/* DASHBOARD */
+
+app.get('/dashboard', (req, res) => {
+  console.log(req.cookies.user_id)
+  db.all(
+    `SELECT * FROM lists WHERE user_id = ? ORDER BY id DESC`,
+    [req.cookies.user_id],
+    (err, lists) => {
+      if (err) {
+        return res.redirect('/login');
+      }
+      res.render('dashboard', { lists });
+    }
+  );
 });
 
 /* REGISTER */
@@ -160,15 +175,14 @@ app.get('/logout', (req, res) => {
 
 /* DASHBOARD */
 
-app.get('/dashboard', requireLogin, (req, res) => {
+app.get('/dashboard', (req, res) => {
   db.all(
     `SELECT * FROM lists WHERE user_id = ? ORDER BY id DESC`,
-    [/*req.user.id*/1],
+    [req.user.id],
     (err, lists) => {
       if (err) {
         return res.redirect('/login');
       }
-      console.log(lists)
       res.render('dashboard', { lists });
     }
   );
