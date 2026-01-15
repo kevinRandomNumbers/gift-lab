@@ -20,34 +20,21 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Flash-style messages
-app.use((req, res, next) => {
-  res.locals.currentUser = null;
-  res.locals.error = req.cookies.error || null;
-  res.locals.success = req.cookies.success || null;
-  res.clearCookie('error');
-  res.clearCookie('success');
-  next();
-});
-
-// Simple flash helpers
-function flash(res, type, msg) {
-  res.cookie(type, msg, { maxAge: 2000 });
-}
 
 // JWT middleware
 function requireLogin(req, res, next) {
-  const token = req.cookies.token;
-  if (!token) return res.redirect('/login');
+  // const token = req.cookies.token;
+  // if (!token) return res.redirect('/login');
 
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    req.user = decoded;
-    res.locals.currentUser = decoded;
-    next();
-  } catch (err) {
-    return res.redirect('/login');
-  }
+  // try {
+  //   const decoded = jwt.verify(token, JWT_SECRET);
+  //   req.user = decoded;
+  //   res.locals.currentUser = decoded;
+  //   next();
+  // } catch (err) {
+  //   return res.redirect('/login');
+  // }
+  next(); // just for testing
 }
 
 // DB in memory
@@ -83,22 +70,27 @@ db.serialize(() => {
 
   // Seed users
   const adminPass = bcrypt.hashSync("56yTDv!!SQWxcez&&2S", 10);
+  const jeremyPass = bcrypt.hashSync("cheesecake",10);
 
   db.run(`INSERT INTO users (username, password_hash) VALUES (?, ?)`, ["admin", adminPass]);
+  db.run(`INSERT INTO users (username, password_hash) VALUES (?, ?)`, ["jeremy", jeremyPass]);
   // Seed lists
-  db.run(`INSERT INTO lists (user_id, title, share_token) VALUES (1, 'Admin Christmas', 'share-admin')`);
+  db.run(`INSERT INTO lists (user_id, title, share_token) VALUES (1, 'Admin b-day', 'share-admin')`);
+  db.run(`INSERT INTO lists (user_id, title, share_token) VALUES (2, 'Jeremey b-day', 'share-jeremey')`);
 
   // Seed items
   db.run(`INSERT INTO list_items (list_id, item_name) VALUES (1, 'Lego set')`);
   db.run(`INSERT INTO list_items (list_id, item_name) VALUES (1, 'Noise cancelling headphones')`);
   db.run(`INSERT INTO list_items (list_id, item_name) VALUES (1, 'You found the bug!')`);
+  db.run(`INSERT INTO list_items (list_id, item_name) VALUES (2, 'keyboard')`);
+  db.run(`INSERT INTO list_items (list_id, item_name) VALUES (2, 'computer')`);
 });
 
 // Routes
 
 app.get('/', (req, res) => {
-  const token = req.cookies.token;
-  if (!token) return res.redirect('/login');
+  // const token = req.cookies.token;
+  // if (!token) return res.redirect('/login');
   return res.redirect('/dashboard');
 });
 
@@ -115,7 +107,6 @@ app.post('/login', (req, res) => {
     if (err) return res.status(500).send("Internal error.");
 
     if (!user || !bcrypt.compareSync(password, user.password_hash)) {
-      flash(res, 'error', 'Invalid credentials.');
       return res.redirect('/login');
     }
 
@@ -132,7 +123,6 @@ app.post('/login', (req, res) => {
       sameSite: "Lax"
     });
 
-    flash(res, 'success', 'Logged in!');
     res.redirect('/dashboard');
   });
 });
@@ -173,12 +163,12 @@ app.get('/logout', (req, res) => {
 app.get('/dashboard', requireLogin, (req, res) => {
   db.all(
     `SELECT * FROM lists WHERE user_id = ? ORDER BY id DESC`,
-    [req.user.id],
+    [/*req.user.id*/1],
     (err, lists) => {
       if (err) {
-        flash(res, 'error', 'Unable to load lists.');
         return res.redirect('/login');
       }
+      console.log(lists)
       res.render('dashboard', { lists });
     }
   );
@@ -204,15 +194,14 @@ app.post('/lists', requireLogin, (req, res) => {
 
 /* VIEW LIST */
 
-app.get('/lists/:id', requireLogin, (req, res) => {
+app.get('/list/:id', requireLogin, (req, res) => {
   const listId = req.params.id;
 
   db.get(
-    `SELECT * FROM lists WHERE id = ? AND user_id = ?`,
-    [listId, req.user.id],
+    `SELECT * FROM lists WHERE id = ?`,
+    [listId],
     (err, list) => {
       if (!list) {
-        flash(res, 'error', 'List not found.');
         return res.redirect('/dashboard');
       }
 
@@ -238,7 +227,6 @@ app.post('/lists/:id/edit', requireLogin, (req, res) => {
     [title, listId, req.user.id],
     function (err) {
       if (err || this.changes === 0) flash(res, 'error', 'Could not update list.');
-      else flash(res, 'success', 'List updated.');
       res.redirect(`/lists/${listId}`);
     }
   );
@@ -255,7 +243,6 @@ app.post('/lists/:id/delete', requireLogin, (req, res) => {
       [listId, req.user.id],
       function (err2) {
         if (err2 || this.changes === 0) flash(res, 'error', 'Could not delete list.');
-        else flash(res, 'success', 'List deleted.');
         res.redirect('/dashboard');
       }
     );
@@ -264,27 +251,15 @@ app.post('/lists/:id/delete', requireLogin, (req, res) => {
 
 /* ADD ITEM */
 
-app.post('/lists/:id/items/add', requireLogin, (req, res) => {
+app.post('/lists/:id/items/add', /*requireLogin,*/ (req, res) => {
   const listId = req.params.id;
-  const { item_name } = req.body;
+  const  item_name  = req.body.new_item;
 
-  // check ownership
-  db.get(
-    `SELECT * FROM lists WHERE id = ? AND user_id = ?`,
-    [listId, req.user.id],
-    (err, list) => {
-      if (!list) {
-        flash(res, 'error', 'List not found.');
-        return res.redirect('/dashboard');
-      }
-
-      db.run(
-        `INSERT INTO list_items (list_id, item_name) VALUES (?, ?)`,
-        [listId, item_name],
-        () => res.redirect(`/lists/${listId}`)
-      );
-    }
-  );
+  db.run(
+    `INSERT INTO list_items (list_id, item_name) values (?, ?)`,
+    [listId, item_name],
+    () => res.redirect(`/list/${listId}`)
+  )
 });
 
 /* DELETE ITEM */
@@ -300,12 +275,10 @@ app.post('/items/:id/delete', requireLogin, (req, res) => {
     [itemId],
     (err, row) => {
       if (!row || row.user_id !== req.user.id) {
-        flash(res, 'error', 'Item not found.');
         return res.redirect('/dashboard');
       }
 
       db.run(`DELETE FROM list_items WHERE id = ?`, [itemId], () => {
-        flash(res, 'success', 'Item deleted.');
         res.redirect(`/lists/${row.list_id}`);
       });
     }

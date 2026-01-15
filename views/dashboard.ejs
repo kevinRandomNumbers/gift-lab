@@ -1,41 +1,64 @@
-<%- include('partials/header', { title: 'Dashboard' }) %>
+<!DOCTYPE html>
+<html lang="en">
 
-<h2 class="mb-3">Your gift lists</h2>
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<form class="row g-3 mb-4" method="POST" action="/lists">
-  <div class="col-md-8">
-    <input name="title" class="form-control" placeholder="New list title" required>
-  </div>
-  <div class="col-md-4">
-    <button class="btn btn-success w-100">Create list</button>
-  </div>
-</form>
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
 
-<% if (lists.length === 0) { %>
-  <p>No lists yet. Start by creating one.</p>
-<% } else { %>
-  <div class="list-group">
-    <% lists.forEach(list => { %>
-      <div class="list-group-item d-flex justify-content-between align-items-center">
-        <div>
-          <a href="/lists/<%= list.id %>"><strong><%= list.title %></strong></a><br>
-          <% if (list.share_token) { %>
-            <small>Share link: /share/<%= list.share_token %></small>
-          <% } else { %>
-            <small>No share link yet</small>
-          <% } %>
+<body class="bg-light">
+
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-md-8 col-lg-6">
+
+        <div class="card shadow-sm">
+          <div class="card-header bg-dark text-white">
+            <h1 class="h4 mb-0 text-center">Dashboard</h1>
+          </div>
+
+          <ul class="list-group list-group-flush">
+            <% if (lists.length===0) { %>
+              <li class="list-group-item text-center text-muted">
+                This list is empty. Which is either peaceful or tragic.
+              </li>
+              <% } else { %>
+
+                <div class="card-body p-0">
+                  <ul class="list-group list-group-flush">
+                    <% lists.forEach(list=> { %>
+                      <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>
+                              <%= list.title %>
+                            </strong>
+                          </a>
+                          <br>
+                          <small class="text-muted">
+                            Share token:
+                            <code id="token-<%= list.id %>"><%= list.share_token %></code>
+                          </small>
+                        </div>
+                        <a href="/list/<%= list.id %>" class="btn btn-sm btn-secondary rounded-pill">
+                          View
+                        </a>
+                      </li>
+                      <% }) %>
+                  </ul>
+                </div>
+                <% } %>
         </div>
-        <div class="d-flex gap-2">
-          <form method="POST" action="/lists/<%= list.id %>/share">
-            <button class="btn btn-outline-primary btn-sm">Share</button>
-          </form>
-          <form method="POST" action="/lists/<%= list.id %>/delete" onsubmit="return confirm('Delete this list?');">
-            <button class="btn btn-outline-danger btn-sm">Delete</button>
-          </form>
-        </div>
+
       </div>
-    <% }) %>
+    </div>
   </div>
-<% } %>
 
-<%- include('partials/footer') %>
+  <!-- Bootstrap JS (optional, only needed if you use components like modals, dropdowns, etc.) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
