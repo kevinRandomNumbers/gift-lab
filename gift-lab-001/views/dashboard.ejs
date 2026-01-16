@@ -40,25 +40,25 @@
                     const toast = new bootstrap.Toast(toastEl);
                     toast.show();
                   </script>
+                  <!-- Adding list form -->
                   <% } %>
+                  <div class="container">
+                    <form action="/lists" method="POST">
+                      <div class="input-group mb-3 mt-2">
+                        <span class="input-group-text" id="inputGroup-sizing-default">Add list:</span>
+                        <input type="text" name="new_list" class="form-control" aria-label="Sizing example input"
+                          aria-describedby="inputGroup-sizing-default" required>
+                      </div>
+                      <div class="col-12">
+                        <button type="submit" class="btn btn-secondary">Add list</button>
+                      </div>
+                    </form>
+                  </div>
                 <% if (lists.length===0) { %>
                   <li class="list-group-item text-center text-muted">
                     This list is empty. Which is either peaceful or tragic.
                   </li>
                   <% } else { %>
-                    <!-- Adding list form -->
-                    <div class="container">
-                      <form action="/lists" method="POST">
-                        <div class="input-group mb-3 mt-2">
-                          <span class="input-group-text" id="inputGroup-sizing-default">Add list:</span>
-                          <input type="text" name="new_list" class="form-control" aria-label="Sizing example input"
-                            aria-describedby="inputGroup-sizing-default" required>
-                        </div>
-                        <div class="col-12">
-                          <button type="submit" class="btn btn-secondary">Add list</button>
-                        </div>
-                      </form>
-                    </div>
                     <!-- Lists -->
                     <div class="card-body p-0">
                       <ul class="list-group list-group-flush">
