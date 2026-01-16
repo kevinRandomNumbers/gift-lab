@@ -3,7 +3,7 @@ This is a lab that allows me to explore making vulnerable labs as part of my Web
 ## Purpose
 The purpose of the app is that a user can create lists for gift ideas. Those gift lists then can be shared with other users.
 ## Installation
-To run the lab simply run `nmp install`.
+To run the lab simply run `npm install`.
 
 After the node_modules have been installed, you can run the app with `node server.js`
 

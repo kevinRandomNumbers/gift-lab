@@ -25,34 +25,23 @@
             </h1>
           </div>
 
-          <div class="container mb-3">
-            <form action="/lists/<%= list.id %>/items/add" method="POST">
-              <div class="input-group mb-3 mt-2">
-                <span class="input-group-text" id="inputGroup-sizing-default">Add item:</span>
-                <input type="text" name="new_item" class="form-control" aria-label="Sizing example input"
-                  aria-describedby="inputGroup-sizing-default" required>
-              </div>
-              <div class="col-12">
-                <button type="submit" class="btn btn-secondary">Add to list</button>
-              </div>
-            </form>
-          </div>
-
           <ul class="list-group list-group-flush">
             <% if (items.length===0) { %>
               <li class="list-group-item text-center text-muted">
                 This list is empty.
               </li>
               <% } else { %>
+
+  
                 <% items.forEach(item=> { %>
                   <li class="list-group-item d-flex justify-content-between align-items-center">
                     <strong>
                       <%= item.item_name %>
                     </strong>
                     <form action="/delete/<%=item.item_name%>/<%=list.id%>" method="POST" style="margin:0;">
-                            <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle"
-                              title="Delete item">
-                              🗑️
+                            <button type="submit" class="btn btn-sm btn-outline-success rounded-circle"
+                              title="Bought item">
+                              ✅
                             </button>
                           </form>
                   </li>
@@ -61,13 +50,6 @@
           </ul>
 
         </div>
-
-        <div class="text-center mt-3">
-          <a href="/dashboard" class="btn btn-outline-secondary btn-sm">
-            Back to dashboard
-          </a>
-        </div>
-
       </div>
     </div>
   </div>
