@@ -12,7 +12,7 @@ Run `npm run dev` if you need nodemon.
 - If you want to learn black box testing, run the app and hack away.
 - Should you want to do code review, all code is available :)
 ## Users
-- `admin:pass`
+- `jessamy:tiramisu`
 - `jeremy:cheesecake`
 ## Remarks
 - Please note that the database is in memory, so all data is lost after the application has been closed.

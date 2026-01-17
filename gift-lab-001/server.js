@@ -28,18 +28,17 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // JWT middleware
 function requireLogin(req, res, next) {
-  // const token = req.cookies.token;
-  // if (!token) return res.redirect('/login');
+  const token = req.cookies.token;
+  if (!token) return res.redirect('/login');
 
-  // try {
-  //   const decoded = jwt.verify(token, JWT_SECRET);
-  //   req.user = decoded;
-  //   res.locals.currentUser = decoded;
-  //   next();
-  // } catch (err) {
-  //   return res.redirect('/login');
-  // }
-  next(); // just for testing
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.user = decoded;
+    res.locals.currentUser = decoded;
+    next();
+  } catch (err) {
+    return res.redirect('/login');
+  }
 }
 
 // DB in memory
@@ -93,9 +92,15 @@ db.serialize(() => {
 // Routes
 
 app.get('/', (req, res) => {
-  // const token = req.cookies.token;
-  // if (!token) return res.redirect('/login');
-  return res.redirect('/login');
+  const token = req.cookies.token;
+  if (!token) return res.redirect('/login');
+  
+  try {
+    jwt.verify(token, JWT_SECRET);
+    return res.redirect('/dashboard');
+  } catch (err) {
+    return res.redirect('/login');
+  }
 });
 
 // Login
@@ -113,21 +118,30 @@ app.post('/login', (req, res) => {
       return res.redirect('/login');
     }
 
-    res.cookie("user_id", user.id, {
+    // Create JWT token
+    const token = jwt.sign(
+      { id: user.id, username: user.username },
+      JWT_SECRET,
+      { expiresIn: JWT_EXPIRES_IN }
+    );
+
+    // Set token in cookie
+    res.cookie("token", token, {
       httpOnly: true,
       sameSite: "lax",
       path: "/"
     });
+    
     res.redirect('/dashboard');
   });
 });
 
 // Dashboard
-app.get('/dashboard', (req, res) => {
+app.get('/dashboard', requireLogin, (req, res) => {
   const shared = req.query.shared;
   db.all(
     `SELECT * FROM lists WHERE user_id = ? ORDER BY id DESC`,
-    [req.cookies.user_id],
+    [req.user.id],
     (err, lists) => {
       if (err) {
         return res.redirect('/login');
@@ -143,7 +157,7 @@ app.get('/list/:id', requireLogin, (req, res) => {
 
   db.get(
     `SELECT * FROM lists WHERE id = ? and user_id = ?`,  //! adding user_id prevents IDOR
-    [listId, req.cookies.user_id],
+    [listId, req.user.id],
     (err, list) => {
       if (!list) {
         return res.redirect('/dashboard');
@@ -164,7 +178,7 @@ app.get('/list/:id', requireLogin, (req, res) => {
 app.post('/lists/:id/items/add', requireLogin, (req, res) => {
   const listId = req.params.id;
   const item_name = req.body.new_item;
-  const userId = req.cookies.user_id;
+  const userId = req.user.id;
 
   // Step 1: Check ownership
   // ! If I comment this, you can add items on lists not owned by you
@@ -194,7 +208,7 @@ app.post('/lists', requireLogin, (req, res) => {
 
   db.run(
     `INSERT INTO lists (user_id, title) VALUES (?, ?)`,
-    [req.cookies.user_id, newList],
+    [req.user.id, newList],
     function (err) {
       if (err) {
         return res.redirect('/dashboard');
@@ -208,15 +222,23 @@ app.post('/lists', requireLogin, (req, res) => {
 // Delete list
 app.post('/lists/:id/delete', requireLogin, (req, res) => {
   const listId = req.params.id;
-  db.run(`DELETE FROM list_items WHERE list_id = ?`, [listId], () => {
-    db.run(
-      `DELETE FROM lists WHERE id = ? AND user_id = ?`, //! and user_id makes sure you can't delete anyone else's list
-      [listId, req.cookies.user_id],
-      function (err) {
-        res.redirect('/dashboard');
+  
+  // Check ownership
+  db.get('SELECT id FROM lists WHERE id = ? AND user_id = ?', 
+    [listId, req.user.id], 
+    (err, list) => {
+      if (err || !list) {
+        return res.status(403).send('Not your list');
       }
-    );
-  });
+      
+      // delete items and list
+      db.run('DELETE FROM list_items WHERE list_id = ?', [listId], (err) => {
+        db.run('DELETE FROM lists WHERE id = ?', [listId], (err) => {
+          res.redirect('/dashboard');
+        });
+      });
+    }
+  );
 });
 
 // Generate share link
@@ -226,7 +248,7 @@ app.post('/lists/:id/share', requireLogin, (req, res) => {
 
   db.run(
     `UPDATE lists SET share_token = ? WHERE id = ? AND user_id = ?`,
-    [token, listId, req.cookies.user_id],
+    [token, listId, req.user.id],
     function (err) {
       if (err || this.changes === 0) {
         console.log("error creating link")
