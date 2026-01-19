@@ -37,7 +37,7 @@
                 <strong><%= item.item_name %></strong>
               </span>
               <% if (!item.bought) { %>
-              <form action="/delete/<%= item.item_name %>/<%= list.id %>" method="POST" class="m-0">
+              <form action="/delete/<%= item.id %>/<%= list.id %>" method="POST" class="m-0">
                 <button type="submit" class="btn btn-sm btn-outline-success rounded-circle" title="Mark as bought">
                   <i class="bi bi-bag-check"></i>
                 </button>

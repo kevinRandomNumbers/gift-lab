@@ -45,7 +45,7 @@
             <% items.forEach(item => { %>
             <li class="list-group-item d-flex justify-content-between align-items-center">
               <strong><%= item.item_name %></strong>
-              <form action="/delete/<%= item.item_name %>/<%= list.id %>" method="POST" class="m-0">
+              <form action="/delete/<%= item.id %>/<%= list.id %>" method="POST" class="m-0">
                 <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle" title="Delete item">
                   <i class="bi bi-trash"></i>
                 </button>

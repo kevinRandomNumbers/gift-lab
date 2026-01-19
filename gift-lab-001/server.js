@@ -274,8 +274,8 @@ app.get('/share/:token', (req, res) => {
 });
 
 // Delete item
-app.post('/delete/:item_name/:list_id', requireLogin, (req, res) => {
-  const item_name = req.params.item_name;
+app.post('/delete/:item_id/:list_id', requireLogin, (req, res) => {
+  const item_id = req.params.item_id;
   const list_id = req.params.list_id;
 
   // Validate Referer to prevent open redirect
@@ -302,7 +302,7 @@ app.post('/delete/:item_name/:list_id', requireLogin, (req, res) => {
       if (err || !list) {
         return res.status(403).send("Nice try. That's not your list.");
       }
-      db.run(`DELETE FROM list_items where list_id = ? and item_name = ?`, [list_id, item_name], () => {
+      db.run(`DELETE FROM list_items WHERE id = ? AND list_id = ?`, [item_id, list_id], () => {
         res.redirect(backUrl);
       });
     }
