@@ -1,78 +1,75 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="en" class="h-100">
 <head>
   <meta charset="UTF-8">
-  <title>
-    <%= list.title %>
-  </title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <!-- Bootstrap -->
+  <title><%= list.title %> - Gift Lab</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
 </head>
+<body class="d-flex flex-column h-100 bg-light">
 
-<body class="bg-light">
+<%- include('partials/header') %>
 
+<main class="flex-shrink-0">
   <div class="container py-5">
     <div class="row justify-content-center">
       <div class="col-md-8 col-lg-6">
 
-        <div class="card shadow-sm">
-          <div class="card-header bg-dark text-white text-center">
+        <div class="card shadow-sm border-0 rounded-3">
+          <div class="card-header bg-dark text-white text-center py-3">
             <h1 class="h4 mb-0">
-              List: <%= list.title %>
+              <i class="bi bi-list-ul"></i> <%= list.title %>
             </h1>
           </div>
 
-          <div class="container mb-3">
+          <div class="card-body">
             <form action="/lists/<%= list.id %>/items/add" method="POST">
-              <div class="input-group mb-3 mt-2">
-                <span class="input-group-text" id="inputGroup-sizing-default">Add item:</span>
-                <input type="text" name="new_item" class="form-control" aria-label="Sizing example input"
-                  aria-describedby="inputGroup-sizing-default" required>
-              </div>
-              <div class="col-12">
-                <button type="submit" class="btn btn-secondary">Add to list</button>
+              <div class="input-group mb-3">
+                <span class="input-group-text"><i class="bi bi-plus-lg"></i></span>
+                <input type="text" name="new_item" class="form-control" placeholder="Add new item..." required>
+                <button type="submit" class="btn btn-secondary">
+                  <i class="bi bi-plus-circle"></i> Add
+                </button>
               </div>
             </form>
           </div>
 
           <ul class="list-group list-group-flush">
-            <% if (items.length===0) { %>
-              <li class="list-group-item text-center text-muted">
-                This list is empty.
-              </li>
-              <% } else { %>
-                <% items.forEach(item=> { %>
-                  <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <strong>
-                      <%= item.item_name %>
-                    </strong>
-                    <form action="/delete/<%=item.item_name%>/<%=list.id%>" method="POST" style="margin:0;">
-                            <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle"
-                              title="Delete item">
-                              🗑️
-                            </button>
-                          </form>
-                  </li>
-                  <% }) %>
-                    <% } %>
+            <% if (items.length === 0) { %>
+            <li class="list-group-item text-center text-muted py-4">
+              <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+              This list is empty.
+            </li>
+            <% } else { %>
+            <% items.forEach(item => { %>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <strong><%= item.item_name %></strong>
+              <form action="/delete/<%= item.item_name %>/<%= list.id %>" method="POST" class="m-0">
+                <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle" title="Delete item">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </form>
+            </li>
+            <% }) %>
+            <% } %>
           </ul>
 
         </div>
 
         <div class="text-center mt-3">
           <a href="/dashboard" class="btn btn-outline-secondary btn-sm">
-            Back to dashboard
+            <i class="bi bi-arrow-left"></i> Back to dashboard
           </a>
         </div>
 
       </div>
     </div>
   </div>
+</main>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<%- include('partials/footer') %>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-
 </html>

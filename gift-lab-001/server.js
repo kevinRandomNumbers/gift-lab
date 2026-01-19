@@ -93,7 +93,7 @@ db.serialize(() => {
 
 app.get('/', (req, res) => {
   const token = req.cookies.token;
-  if (!token) return res.redirect('/login');
+  if (!token) return res.redirect('/register');
   
   try {
     jwt.verify(token, JWT_SECRET);
@@ -213,8 +213,7 @@ app.post('/lists', requireLogin, (req, res) => {
       if (err) {
         return res.redirect('/dashboard');
       }
-      const listId = this.lastID;
-      res.redirect(`/list/${listId}`);
+      res.redirect('/dashboard');
     }
   );
 });
@@ -287,7 +286,7 @@ app.post('/delete/:item_name/:list_id', requireLogin, (req, res) => {
   })
 });
 
-/* REGISTER */
+// Register
 
 app.get('/register', (req, res) => {
   res.render('register');
@@ -296,20 +295,39 @@ app.get('/register', (req, res) => {
 app.post('/register', (req, res) => {
   const { username, password } = req.body;
 
-  const hash = bcrypt.hashSync(password, 10);
-  db.run(
-    `INSERT INTO users (username, password_hash) VALUES (?, ?)`,
-    [username, hash],
-    function (err) {
+  if (!username || !password) {
+    return res.redirect('/register');
+  }
+
+  // Check if username already exists
+  db.get(
+    `SELECT id FROM users WHERE username = ?`,
+    [username],
+    (err, existingUser) => {
       if (err) {
         return res.redirect('/register');
       }
-      res.redirect('/login');
+
+      if (existingUser) {
+        return res.redirect('/register');
+      }
+
+      const hash = bcrypt.hashSync(password, 10);
+      db.run(
+        `INSERT INTO users (username, password_hash) VALUES (?, ?)`,
+        [username, hash],
+        function (err) {
+          if (err) {
+            return res.redirect('/register');
+          }
+          res.redirect('/login');
+        }
+      );
     }
   );
 });
 
-/* LOGOUT */
+// Logout
 
 app.get('/logout', (req, res) => {
   res.clearCookie('token');

@@ -1,113 +1,105 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="en" class="h-100">
 <head>
   <meta charset="UTF-8">
-  <title>Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <!-- Bootstrap 5 -->
+  <title>Dashboard - Gift Lab</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap JS (optional, only needed if you use components like modals, dropdowns, etc.) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </head>
+<body class="d-flex flex-column h-100 bg-light">
 
-<body class="bg-light">
-  <%- include('partials/header') %>
+<%- include('partials/header') %>
+
+<main class="flex-shrink-0">
   <div class="container py-5">
     <div class="row justify-content-center">
       <div class="col-md-8 col-lg-6">
 
-        <div class="card shadow-sm">
-          <div class="card-header bg-dark text-white">
-            <h1 class="h4 mb-0 text-center">Dashboard</h1>
+        <div class="card shadow-sm border-0 rounded-3">
+          <div class="card-header bg-dark text-white py-3">
+            <h1 class="h4 mb-0 text-center"><i class="bi bi-grid-3x3-gap"></i> Dashboard</h1>
           </div>
-          
+
+          <% if (shared === "shared") { %>
+          <div class="toast-container position-fixed top-0 end-0 p-3">
+            <div id="shareToast" class="toast align-items-center text-bg-success border-0" role="alert">
+              <div class="d-flex">
+                <div class="toast-body">
+                  <i class="bi bi-check-circle"></i> Share link created successfully.
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+              </div>
+            </div>
+          </div>
+          <script>
+            const toastEl = document.getElementById('shareToast');
+            const toast = new bootstrap.Toast(toastEl);
+            toast.show();
+          </script>
+          <% } %>
+
+          <div class="card-body">
+            <form action="/lists" method="POST">
+              <div class="input-group mb-3">
+                <span class="input-group-text"><i class="bi bi-plus-lg"></i></span>
+                <input type="text" name="new_list" class="form-control" placeholder="New list name..." required>
+                <button type="submit" class="btn btn-secondary">
+                  <i class="bi bi-plus-circle"></i> Add list
+                </button>
+              </div>
+            </form>
+          </div>
+
           <ul class="list-group list-group-flush">
-                <% if (shared === "shared") { %>
-                  <div class="toast-container position-fixed top-0 end-0 p-3">
-                    <div id="shareToast" class="toast align-items-center text-bg-success border-0" role="alert">
-                      <div class="d-flex">
-                        <div class="toast-body">
-                          Share link created successfully.
-                        </div>
-                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-                      </div>
-                    </div>
-                  </div>
-      
-                  <script>
-                    const toastEl = document.getElementById('shareToast');
-                    const toast = new bootstrap.Toast(toastEl);
-                    toast.show();
-                  </script>
-                  <!-- Adding list form -->
-                  <% } %>
-                  <div class="container">
-                    <form action="/lists" method="POST">
-                      <div class="input-group mb-3 mt-2">
-                        <span class="input-group-text" id="inputGroup-sizing-default">Add list:</span>
-                        <input type="text" name="new_list" class="form-control" aria-label="Sizing example input"
-                          aria-describedby="inputGroup-sizing-default" required>
-                      </div>
-                      <div class="col-12">
-                        <button type="submit" class="btn btn-secondary">Add list</button>
-                      </div>
-                    </form>
-                  </div>
-                <% if (lists.length===0) { %>
-                  <li class="list-group-item text-center text-muted">
-                    This list is empty. Which is either peaceful or tragic.
-                  </li>
-                  <% } else { %>
-                    <!-- Lists -->
-                    <div class="card-body p-0">
-                      <ul class="list-group list-group-flush">
-                        <% lists.forEach(list=> { %>
-                          <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <div>
-                              <strong>
-                                <%= list.title %>
-                              </strong>
-                              </a>
-                              <br>
-                              <small class="text-muted">
-                                <!-- TODO figure out how to get the  -->
-                                Share token: <a href="<%= baseUrl %>/share/<%=list.share_token%>"><code><%=list.share_token%></code></a> 
-                              </small>
-                            </div>
-                            <div class="d-flex align-items-center gap-1">
-                              <form action="/list/<%= list.id %>" method="GET" style="margin:0;">
-                                <button type="submit" class="btn btn-sm btn-outline-success rounded-circle"
-                                  title="View list">
-                                  👀
-                                </button>
-                              </form>
+            <% if (lists.length === 0) { %>
+            <li class="list-group-item text-center text-muted py-4">
+              <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+              This list is empty. Which is either peaceful or tragic.
+            </li>
+            <% } else { %>
+            <% lists.forEach(list => { %>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <div>
+                <strong><%= list.title %></strong>
+                <br>
+                <small class="text-muted">
+                  <i class="bi bi-share"></i> Share: <a href="<%= baseUrl %>/share/<%= list.share_token %>"><code><%= list.share_token %></code></a>
+                </small>
+              </div>
+              <div class="d-flex align-items-center gap-1">
+                <form action="/list/<%= list.id %>" method="GET" class="m-0">
+                  <button type="submit" class="btn btn-sm btn-outline-success rounded-circle" title="View list">
+                    <i class="bi bi-eye"></i>
+                  </button>
+                </form>
 
-                              <form action="/lists/<%= list.id %>/delete" method="POST" style="margin:0;">
-                                <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle"
-                                  title="Delete list">
-                                  🗑️
-                                </button>
-                              </form>
+                <form action="/lists/<%= list.id %>/delete" method="POST" class="m-0">
+                  <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle" title="Delete list">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </form>
 
-                              <form action="/lists/<%= list.id %>/share" method="POST" style="margin:0;">
-                                <button type="submit" class="btn btn-sm btn-outline-primary rounded-circle"
-                                  title="Create share link">
-                                  🔗
-                                </button>
-                              </form>
-                            </div>
-                          </li>
-                          <% }) %>
-                      </ul>
-                    </div>
-                    <% } %>
+                <form action="/lists/<%= list.id %>/share" method="POST" class="m-0">
+                  <button type="submit" class="btn btn-sm btn-outline-primary rounded-circle" title="Create share link">
+                    <i class="bi bi-link-45deg"></i>
+                  </button>
+                </form>
+              </div>
+            </li>
+            <% }) %>
+            <% } %>
+          </ul>
+
         </div>
 
       </div>
     </div>
   </div>
-</body>
+</main>
 
+<%- include('partials/footer') %>
+
+</body>
 </html>
