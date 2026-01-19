@@ -8,7 +8,7 @@ const path = require('path');
 const app = express();
 
 // JWT Config
-const JWT_SECRET = "password"; //Lab for cracking JWT
+const JWT_SECRET = "gift_lab_001_2026"; //! Make this simple for JWT cracking lab
 const JWT_EXPIRES_IN = "2h";
 
 // Middleware
@@ -156,7 +156,7 @@ app.get('/list/:id', requireLogin, (req, res) => {
   const listId = req.params.id;
 
   db.get(
-    `SELECT * FROM lists WHERE id = ? and user_id = ?`,  //! adding user_id prevents IDOR
+    `SELECT * FROM lists WHERE id = ? and user_id = ?`,  //! Delete `and user_id` to enable IDOR
     [listId, req.user.id],
     (err, list) => {
       if (!list) {
@@ -222,15 +222,14 @@ app.post('/lists', requireLogin, (req, res) => {
 app.post('/lists/:id/delete', requireLogin, (req, res) => {
   const listId = req.params.id;
   
-  // Check ownership
+  //! Remove `and user_id` if you want somebody else to delete other user's lists
   db.get('SELECT id FROM lists WHERE id = ? AND user_id = ?', 
     [listId, req.user.id], 
     (err, list) => {
       if (err || !list) {
         return res.status(403).send('Not your list');
       }
-      
-      // delete items and list
+
       db.run('DELETE FROM list_items WHERE list_id = ?', [listId], (err) => {
         db.run('DELETE FROM lists WHERE id = ?', [listId], (err) => {
           res.redirect('/dashboard');
@@ -242,7 +241,7 @@ app.post('/lists/:id/delete', requireLogin, (req, res) => {
 
 // Generate share link
 app.post('/lists/:id/share', requireLogin, (req, res) => {
-  const token = Math.random().toString(36).slice(2, 10); //! can make this weaker in future labs
+  const token = Math.random().toString(36).slice(2, 10); //! This is good enough for lab, make weaker for vuln lab
   const listId = req.params.id;
 
   db.run(
@@ -287,7 +286,6 @@ app.post('/delete/:item_name/:list_id', requireLogin, (req, res) => {
 });
 
 // Register
-
 app.get('/register', (req, res) => {
   res.render('register');
 });
@@ -328,32 +326,13 @@ app.post('/register', (req, res) => {
 });
 
 // Logout
-
 app.get('/logout', (req, res) => {
   res.clearCookie('token');
   res.redirect('/login');
 });
 
 
-
-/* EDIT LIST TITLE */
-
-app.post('/lists/:id/edit', requireLogin, (req, res) => {
-  const { title } = req.body;
-  const listId = req.params.id;
-
-  db.run(
-    `UPDATE lists SET title = ? WHERE id = ? AND user_id = ?`,
-    [title, listId, req.user.id],
-    function (err) {
-      if (err || this.changes === 0) flash(res, 'error', 'Could not update list.');
-      res.redirect(`/lists/${listId}`);
-    }
-  );
-});
-
 // Endpoints for testing
-
 app.get("/api/dev/listItems", (req, res) => {
   db.all(`SELECT * FROM list_items`, (err, data) => {
     if (err) {
