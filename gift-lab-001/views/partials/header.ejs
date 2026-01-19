@@ -1,29 +1,29 @@
 <!-- views/partials/header.ejs -->
 <style>
   :root {
-    --gift-red: #c41e3a;
-    --gift-red-dark: #8b0000;
-    --gift-gold: #d4a574;
-    --gift-gold-light: #f4e4bc;
-    --gift-cream: #fdfbf7;
-    --gift-warm-gray: #4a4a4a;
+    --gift-primary: #1a237e;
+    --gift-primary-dark: #0d1642;
+    --gift-accent: #ffd54f;
+    --gift-accent-light: #ffecb3;
+    --gift-background: #f8f9fc;
+    --gift-text: #2c3e50;
   }
 
   body {
-    background: linear-gradient(135deg, var(--gift-cream) 0%, #fff5eb 100%) !important;
+    background: linear-gradient(135deg, var(--gift-background) 0%, #eef1f8 100%) !important;
     min-height: 100vh;
   }
 
   /* Navbar styling */
   .navbar-festive {
-    background: linear-gradient(135deg, var(--gift-red-dark) 0%, var(--gift-red) 100%) !important;
-    box-shadow: 0 4px 15px rgba(139, 0, 0, 0.3);
+    background: linear-gradient(135deg, var(--gift-primary-dark) 0%, var(--gift-primary) 100%) !important;
+    box-shadow: 0 4px 15px rgba(13, 22, 66, 0.3);
   }
 
   .navbar-festive .navbar-brand {
     font-weight: 700;
     font-size: 1.4rem;
-    color: var(--gift-gold-light) !important;
+    color: var(--gift-accent) !important;
     text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
     transition: transform 0.2s ease;
   }
@@ -34,7 +34,7 @@
   }
 
   .navbar-festive .navbar-brand i {
-    color: var(--gift-gold);
+    color: var(--gift-accent);
   }
 
   .navbar-festive .nav-link {
@@ -44,7 +44,7 @@
   }
 
   .navbar-festive .nav-link:hover {
-    color: var(--gift-gold-light) !important;
+    color: var(--gift-accent) !important;
     transform: translateY(-1px);
   }
 
@@ -52,24 +52,24 @@
   .card-festive {
     border: none !important;
     border-radius: 16px !important;
-    box-shadow: 0 10px 40px rgba(139, 0, 0, 0.1), 0 4px 12px rgba(0,0,0,0.05);
+    box-shadow: 0 10px 40px rgba(26, 35, 126, 0.1), 0 4px 12px rgba(0,0,0,0.05);
     overflow: hidden;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    background-color: var(--gift-cream) !important;
+    background-color: #fff !important;
   }
 
   .card-festive:hover {
     transform: translateY(-4px);
-    box-shadow: 0 15px 50px rgba(139, 0, 0, 0.15), 0 8px 20px rgba(0,0,0,0.08);
+    box-shadow: 0 15px 50px rgba(26, 35, 126, 0.15), 0 8px 20px rgba(0,0,0,0.08);
   }
 
   .card-festive .card-body {
-    background-color: var(--gift-cream);
+    background-color: #fff;
   }
 
   .card-header-festive {
-    background: linear-gradient(135deg, var(--gift-red-dark) 0%, var(--gift-red) 100%) !important;
-    border-bottom: 3px solid var(--gift-gold) !important;
+    background: linear-gradient(135deg, var(--gift-primary-dark) 0%, var(--gift-primary) 100%) !important;
+    border-bottom: 3px solid var(--gift-accent) !important;
     padding: 1.25rem !important;
   }
 
@@ -80,61 +80,61 @@
   }
 
   .card-header-festive i {
-    color: var(--gift-gold);
+    color: var(--gift-accent);
   }
 
   /* Button styling */
   .btn-festive {
-    background: linear-gradient(135deg, var(--gift-red) 0%, var(--gift-red-dark) 100%);
+    background: linear-gradient(135deg, var(--gift-primary) 0%, var(--gift-primary-dark) 100%);
     border: none;
     color: #fff;
     font-weight: 600;
     padding: 0.6rem 1.5rem;
     border-radius: 8px;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(196, 30, 58, 0.3);
+    box-shadow: 0 4px 15px rgba(26, 35, 126, 0.3);
   }
 
   .btn-festive:hover {
-    background: linear-gradient(135deg, var(--gift-red-dark) 0%, #6b0000 100%);
+    background: linear-gradient(135deg, var(--gift-primary-dark) 0%, #060a21 100%);
     color: #fff;
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(196, 30, 58, 0.4);
+    box-shadow: 0 6px 20px rgba(26, 35, 126, 0.4);
   }
 
   .btn-festive-outline {
     background: transparent;
-    border: 2px solid var(--gift-red);
-    color: var(--gift-red);
+    border: 2px solid var(--gift-primary);
+    color: var(--gift-primary);
     font-weight: 600;
     transition: all 0.3s ease;
   }
 
   .btn-festive-outline:hover {
-    background: var(--gift-red);
+    background: var(--gift-primary);
     color: #fff;
     transform: translateY(-2px);
   }
 
   /* Form styling */
   .form-control {
-    background-color: #fffdf9;
+    background-color: #fafbfd;
   }
 
   .form-control:focus {
-    border-color: var(--gift-gold);
-    box-shadow: 0 0 0 0.2rem rgba(212, 165, 116, 0.25);
+    border-color: var(--gift-accent);
+    box-shadow: 0 0 0 0.2rem rgba(255, 213, 79, 0.25);
     background-color: #fff;
   }
 
   .form-floating label {
-    color: var(--gift-warm-gray);
+    color: var(--gift-text);
   }
 
   .input-group-text {
-    background: linear-gradient(135deg, var(--gift-gold-light) 0%, var(--gift-gold) 100%);
-    border-color: var(--gift-gold);
-    color: var(--gift-red-dark);
+    background: linear-gradient(135deg, var(--gift-accent-light) 0%, var(--gift-accent) 100%);
+    border-color: var(--gift-accent);
+    color: var(--gift-primary-dark);
   }
 
   /* List items */
@@ -142,15 +142,15 @@
     border-left: none;
     border-right: none;
     transition: all 0.2s ease;
-    background-color: var(--gift-cream);
+    background-color: #fff;
   }
 
   .list-group-item:hover {
-    background-color: rgba(212, 165, 116, 0.15);
+    background-color: rgba(255, 213, 79, 0.1);
   }
 
   .list-group-item strong {
-    color: var(--gift-warm-gray);
+    color: var(--gift-text);
   }
 
   /* Action buttons */
@@ -160,34 +160,34 @@
   }
 
   .btn-outline-danger {
-    border-color: var(--gift-red);
-    color: var(--gift-red);
+    border-color: #dc3545;
+    color: #dc3545;
   }
 
   .btn-outline-danger:hover {
-    background-color: var(--gift-red);
-    border-color: var(--gift-red);
+    background-color: #dc3545;
+    border-color: #dc3545;
   }
 
   .btn-outline-primary {
-    border-color: var(--gift-gold);
-    color: #b8860b;
+    border-color: var(--gift-primary);
+    color: var(--gift-primary);
   }
 
   .btn-outline-primary:hover {
-    background-color: var(--gift-gold);
-    border-color: var(--gift-gold);
+    background-color: var(--gift-primary);
+    border-color: var(--gift-primary);
     color: #fff;
   }
 
   /* Links */
   a {
-    color: var(--gift-red);
+    color: var(--gift-primary);
     transition: color 0.2s ease;
   }
 
   a:hover {
-    color: var(--gift-red-dark);
+    color: var(--gift-primary-dark);
   }
 
   /* Toast customization */
@@ -197,27 +197,27 @@
 
   /* Footer will have its own styling */
   .footer-festive {
-    background: linear-gradient(135deg, var(--gift-cream) 0%, #fff5eb 100%);
-    border-top: 2px solid var(--gift-gold) !important;
+    background: linear-gradient(135deg, var(--gift-background) 0%, #eef1f8 100%);
+    border-top: 2px solid var(--gift-accent) !important;
   }
 
   .footer-festive span {
-    color: var(--gift-warm-gray);
+    color: var(--gift-text);
   }
 
   .footer-festive i {
-    color: var(--gift-red);
+    color: var(--gift-primary);
   }
 
   /* Empty state styling */
   .text-muted {
-    color: #8b7355 !important;
+    color: #6c7a89 !important;
   }
 
   /* Code/share token styling */
   code {
-    background: var(--gift-gold-light);
-    color: var(--gift-red-dark);
+    background: var(--gift-accent-light);
+    color: var(--gift-primary-dark);
     padding: 0.2em 0.5em;
     border-radius: 4px;
     font-size: 0.85em;
