@@ -1,7 +1,237 @@
 <!-- views/partials/header.ejs -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+<style>
+  :root {
+    --gift-red: #c41e3a;
+    --gift-red-dark: #8b0000;
+    --gift-gold: #d4a574;
+    --gift-gold-light: #f4e4bc;
+    --gift-cream: #fdfbf7;
+    --gift-warm-gray: #4a4a4a;
+  }
+
+  body {
+    background: linear-gradient(135deg, var(--gift-cream) 0%, #fff5eb 100%) !important;
+    min-height: 100vh;
+  }
+
+  /* Navbar styling */
+  .navbar-festive {
+    background: linear-gradient(135deg, var(--gift-red-dark) 0%, var(--gift-red) 100%) !important;
+    box-shadow: 0 4px 15px rgba(139, 0, 0, 0.3);
+  }
+
+  .navbar-festive .navbar-brand {
+    font-weight: 700;
+    font-size: 1.4rem;
+    color: var(--gift-gold-light) !important;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+    transition: transform 0.2s ease;
+  }
+
+  .navbar-festive .navbar-brand:hover {
+    transform: scale(1.05);
+    color: #fff !important;
+  }
+
+  .navbar-festive .navbar-brand i {
+    color: var(--gift-gold);
+  }
+
+  .navbar-festive .nav-link {
+    color: rgba(255,255,255,0.9) !important;
+    font-weight: 500;
+    transition: all 0.2s ease;
+  }
+
+  .navbar-festive .nav-link:hover {
+    color: var(--gift-gold-light) !important;
+    transform: translateY(-1px);
+  }
+
+  /* Card styling */
+  .card-festive {
+    border: none !important;
+    border-radius: 16px !important;
+    box-shadow: 0 10px 40px rgba(139, 0, 0, 0.1), 0 4px 12px rgba(0,0,0,0.05);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background-color: var(--gift-cream) !important;
+  }
+
+  .card-festive:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 15px 50px rgba(139, 0, 0, 0.15), 0 8px 20px rgba(0,0,0,0.08);
+  }
+
+  .card-festive .card-body {
+    background-color: var(--gift-cream);
+  }
+
+  .card-header-festive {
+    background: linear-gradient(135deg, var(--gift-red-dark) 0%, var(--gift-red) 100%) !important;
+    border-bottom: 3px solid var(--gift-gold) !important;
+    padding: 1.25rem !important;
+  }
+
+  .card-header-festive h1,
+  .card-header-festive h4 {
+    color: #fff;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+  }
+
+  .card-header-festive i {
+    color: var(--gift-gold);
+  }
+
+  /* Button styling */
+  .btn-festive {
+    background: linear-gradient(135deg, var(--gift-red) 0%, var(--gift-red-dark) 100%);
+    border: none;
+    color: #fff;
+    font-weight: 600;
+    padding: 0.6rem 1.5rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(196, 30, 58, 0.3);
+  }
+
+  .btn-festive:hover {
+    background: linear-gradient(135deg, var(--gift-red-dark) 0%, #6b0000 100%);
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(196, 30, 58, 0.4);
+  }
+
+  .btn-festive-outline {
+    background: transparent;
+    border: 2px solid var(--gift-red);
+    color: var(--gift-red);
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+
+  .btn-festive-outline:hover {
+    background: var(--gift-red);
+    color: #fff;
+    transform: translateY(-2px);
+  }
+
+  /* Form styling */
+  .form-control {
+    background-color: #fffdf9;
+  }
+
+  .form-control:focus {
+    border-color: var(--gift-gold);
+    box-shadow: 0 0 0 0.2rem rgba(212, 165, 116, 0.25);
+    background-color: #fff;
+  }
+
+  .form-floating label {
+    color: var(--gift-warm-gray);
+  }
+
+  .input-group-text {
+    background: linear-gradient(135deg, var(--gift-gold-light) 0%, var(--gift-gold) 100%);
+    border-color: var(--gift-gold);
+    color: var(--gift-red-dark);
+  }
+
+  /* List items */
+  .list-group-item {
+    border-left: none;
+    border-right: none;
+    transition: all 0.2s ease;
+    background-color: var(--gift-cream);
+  }
+
+  .list-group-item:hover {
+    background-color: rgba(212, 165, 116, 0.15);
+  }
+
+  .list-group-item strong {
+    color: var(--gift-warm-gray);
+  }
+
+  /* Action buttons */
+  .btn-outline-success {
+    border-color: #198754;
+    color: #198754;
+  }
+
+  .btn-outline-danger {
+    border-color: var(--gift-red);
+    color: var(--gift-red);
+  }
+
+  .btn-outline-danger:hover {
+    background-color: var(--gift-red);
+    border-color: var(--gift-red);
+  }
+
+  .btn-outline-primary {
+    border-color: var(--gift-gold);
+    color: #b8860b;
+  }
+
+  .btn-outline-primary:hover {
+    background-color: var(--gift-gold);
+    border-color: var(--gift-gold);
+    color: #fff;
+  }
+
+  /* Links */
+  a {
+    color: var(--gift-red);
+    transition: color 0.2s ease;
+  }
+
+  a:hover {
+    color: var(--gift-red-dark);
+  }
+
+  /* Toast customization */
+  .toast.text-bg-success {
+    background: linear-gradient(135deg, #198754 0%, #146c43 100%) !important;
+  }
+
+  /* Footer will have its own styling */
+  .footer-festive {
+    background: linear-gradient(135deg, var(--gift-cream) 0%, #fff5eb 100%);
+    border-top: 2px solid var(--gift-gold) !important;
+  }
+
+  .footer-festive span {
+    color: var(--gift-warm-gray);
+  }
+
+  .footer-festive i {
+    color: var(--gift-red);
+  }
+
+  /* Empty state styling */
+  .text-muted {
+    color: #8b7355 !important;
+  }
+
+  /* Code/share token styling */
+  code {
+    background: var(--gift-gold-light);
+    color: var(--gift-red-dark);
+    padding: 0.2em 0.5em;
+    border-radius: 4px;
+    font-size: 0.85em;
+  }
+
+  /* Badge styling */
+  .badge.bg-success {
+    background: linear-gradient(135deg, #198754 0%, #146c43 100%) !important;
+  }
+</style>
+
+<nav class="navbar navbar-expand-lg navbar-dark navbar-festive">
   <div class="container-fluid">
-    <a class="navbar-brand" href="/dashboard"><i class="bi bi-gift"></i> Gift Lab</a>
+    <a class="navbar-brand" href="/dashboard"><i class="bi bi-gift-fill"></i> Gift Lab</a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>

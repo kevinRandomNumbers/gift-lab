@@ -8,7 +8,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </head>
-<body class="d-flex flex-column h-100 bg-light">
+<body class="d-flex flex-column h-100">
 
 <%- include('partials/header') %>
 
@@ -17,9 +17,9 @@
     <div class="row justify-content-center">
       <div class="col-md-8 col-lg-6">
 
-        <div class="card shadow-sm border-0 rounded-3">
-          <div class="card-header bg-dark text-white py-3">
-            <h1 class="h4 mb-0 text-center"><i class="bi bi-grid-3x3-gap"></i> Dashboard</h1>
+        <div class="card card-festive">
+          <div class="card-header card-header-festive text-center">
+            <h1 class="h4 mb-0"><i class="bi bi-grid-3x3-gap-fill"></i> Dashboard</h1>
           </div>
 
           <% if (shared === "shared") { %>
@@ -45,7 +45,7 @@
               <div class="input-group mb-3">
                 <span class="input-group-text"><i class="bi bi-plus-lg"></i></span>
                 <input type="text" name="new_list" class="form-control" placeholder="New list name..." required>
-                <button type="submit" class="btn btn-secondary">
+                <button type="submit" class="btn btn-festive">
                   <i class="bi bi-plus-circle"></i> Add list
                 </button>
               </div>
@@ -56,7 +56,7 @@
             <% if (lists.length === 0) { %>
             <li class="list-group-item text-center text-muted py-4">
               <i class="bi bi-inbox fs-1 d-block mb-2"></i>
-              This list is empty. Which is either peaceful or tragic.
+              This list is empty.
             </li>
             <% } else { %>
             <% lists.forEach(list => { %>
