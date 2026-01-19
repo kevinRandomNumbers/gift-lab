@@ -8,7 +8,7 @@ const path = require('path');
 const app = express();
 
 // JWT Config
-const JWT_SECRET = "bugforge_gift_lab_001_2026"; 
+const JWT_SECRET = "gift_lab_001_2026"; //! Make this simple for JWT cracking lab
 const JWT_EXPIRES_IN = "2h";
 
 // Middleware
@@ -80,7 +80,7 @@ db.serialize(() => {
   db.run(`INSERT INTO lists (user_id, title, share_token ) VALUES (1, 'Admin B-day', 'bGlzdFdpdGhJZC0x')`);
 
   // Seed items
-  db.run(`INSERT INTO list_items (list_id, item_name) VALUES (1, 'Mechanical keyboard')`);
+  db.run(`INSERT INTO list_items (list_id, item_name) VALUES (1, 'Lego set')`);
   db.run(`INSERT INTO list_items (list_id, item_name) VALUES (1, 'Noise cancelling headphones')`);
   db.run(`INSERT INTO list_items (list_id, item_name) VALUES (1, 'bug{0bscur3_i5_n0t_s3cur3')`);
 });
@@ -152,7 +152,7 @@ app.get('/list/:id', requireLogin, (req, res) => {
   const listId = req.params.id;
 
   db.get(
-    `SELECT * FROM lists WHERE id = ? and user_id = ?`, 
+    `SELECT * FROM lists WHERE id = ? and user_id = ?`,  //! Delete `and user_id` to enable IDOR
     [listId, req.user.id],
     (err, list) => {
       if (!list) {
@@ -176,7 +176,8 @@ app.post('/lists/:id/items/add', requireLogin, (req, res) => {
   const item_name = req.body.new_item;
   const userId = req.user.id;
 
-  // Check ownership before inserting
+  // Step 1: Check ownership
+  // ! If I comment this, you can add items on lists not owned by you
   db.get(
     `SELECT id FROM lists WHERE id = ? AND user_id = ?`,
     [listId, userId],
@@ -185,15 +186,16 @@ app.post('/lists/:id/items/add', requireLogin, (req, res) => {
         return res.status(500).send("DB error");
       }
       if (!list) {
+        // Either the list doesn't exist or it doesn't belong to them
         return res.status(403).send("Nice try. That's not your list.");
       }
-      // Insert into db only after ownership is verified
-      db.run(
-        `INSERT INTO list_items (list_id, item_name) values (?, ?)`,
-        [listId, item_name],
-        () => res.redirect(`/list/${listId}`)
-      );
     });
+  // Insert into db
+  db.run(
+    `INSERT INTO list_items (list_id, item_name) values (?, ?)`,
+    [listId, item_name],
+    () => res.redirect(`/list/${listId}`)
+  )
 });
 
 // Create a list
@@ -215,6 +217,8 @@ app.post('/lists', requireLogin, (req, res) => {
 // Delete list
 app.post('/lists/:id/delete', requireLogin, (req, res) => {
   const listId = req.params.id;
+  
+  //! Remove `and user_id` if you want somebody else to delete other user's lists
   db.get('SELECT id FROM lists WHERE id = ? AND user_id = ?', 
     [listId, req.user.id], 
     (err, list) => {
@@ -233,7 +237,7 @@ app.post('/lists/:id/delete', requireLogin, (req, res) => {
 
 // Generate share link
 app.post('/lists/:id/share', requireLogin, (req, res) => {
-  //! This part is deliberately vulnerable. Idea is that a player decodes this and tries to reach `/share/listWithId-1` 
+  // const token = Math.random().toString(36).slice(2, 10); //! This is good enough for lab, make weaker for vuln lab
   const baseDecoded = "listWithId-";
   const baseEncoded = Buffer.from(baseDecoded).toString('base64');
   const listId = req.params.id;
@@ -254,7 +258,6 @@ app.post('/lists/:id/share', requireLogin, (req, res) => {
 
 // Public shared list view
 app.get('/share/:token', (req, res) => {
-  //! Deliberately not checking the user_id so the exploit explained in `/lists/:id/share` works
   db.get(
     `SELECT * FROM lists WHERE share_token = ?`,
     [req.params.token],
@@ -276,36 +279,10 @@ app.get('/share/:token', (req, res) => {
 app.post('/delete/:item_name/:list_id', requireLogin, (req, res) => {
   const item_name = req.params.item_name;
   const list_id = req.params.list_id;
-
-  // Validate Referer to prevent open redirect
-  let backUrl = "/dashboard";
-  const referer = req.get("Referer");
-  if (referer) {
-    try {
-      const refererUrl = new URL(referer);
-      const host = req.get("host");
-      // Only use referer if it's from the same host
-      if (refererUrl.host === host) {
-        backUrl = refererUrl.pathname;
-      }
-    } catch (e) {
-      // Invalid URL, use default
-    }
-  }
-
-  // Verify ownership before deleting
-  db.get(
-    `SELECT id FROM lists WHERE id = ? AND user_id = ?`,
-    [list_id, req.user.id],
-    (err, list) => {
-      if (err || !list) {
-        return res.status(403).send("Nice try. That's not your list.");
-      }
-      db.run(`DELETE FROM list_items where list_id = ? and item_name = ?`, [list_id, item_name], () => {
-        res.redirect(backUrl);
-      });
-    }
-  );
+  const backUrl = req.get("Referer") || "/dashboard";
+  db.run(`DELETE FROM list_items where list_id = ? and item_name = ?`, [list_id, item_name], () => {
+    res.redirect(backUrl)
+  })
 });
 
 // Register
@@ -352,6 +329,26 @@ app.post('/register', (req, res) => {
 app.get('/logout', (req, res) => {
   res.clearCookie('token');
   res.redirect('/login');
+});
+
+
+// Endpoints for testing
+app.get("/api/dev/listItems", (req, res) => {
+  db.all(`SELECT * FROM list_items`, (err, data) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    res.json(data);
+  });
+});
+
+app.get("/api/dev/lists", (req, res) => {
+  db.all(`SELECT * FROM lists`, (err, data) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    res.json(data);
+  });
 });
 
 // Server
