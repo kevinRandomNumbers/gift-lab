@@ -82,7 +82,7 @@ db.serialize(() => {
   // Seed items
   db.run(`INSERT INTO list_items (list_id, item_name) VALUES (1, 'Mechanical keyboard')`);
   db.run(`INSERT INTO list_items (list_id, item_name) VALUES (1, 'Noise cancelling headphones')`);
-  db.run(`INSERT INTO list_items (list_id, item_name) VALUES (1, 'bug{0bscur3_i5_n0t_s3cur3')`);
+  db.run(`INSERT INTO list_items (list_id, item_name) VALUES (1, 'bug{0bscur3_i5_n0t_s3cur3}')`);
 });
 
 // Routes
@@ -101,7 +101,8 @@ app.get('/', (req, res) => {
 
 // Login
 app.get('/login', (req, res) => {
-  res.render('login');
+  const error = req.query.error;
+  res.render('login', { error });
 });
 
 app.post('/login', (req, res) => {
@@ -111,7 +112,7 @@ app.post('/login', (req, res) => {
     if (err) return res.status(500).send("Internal error.");
 
     if (!user || !bcrypt.compareSync(password, user.password_hash)) {
-      return res.redirect('/login');
+      return res.redirect('/login?error=invalid');
     }
 
     // Create JWT token
@@ -310,7 +311,8 @@ app.post('/delete/:item_name/:list_id', requireLogin, (req, res) => {
 
 // Register
 app.get('/register', (req, res) => {
-  res.render('register');
+  const error = req.query.error;
+  res.render('register', { error });
 });
 
 app.post('/register', (req, res) => {
@@ -330,7 +332,7 @@ app.post('/register', (req, res) => {
       }
 
       if (existingUser) {
-        return res.redirect('/register');
+        return res.redirect('/register?error=exists');
       }
 
       const hash = bcrypt.hashSync(password, 10);
