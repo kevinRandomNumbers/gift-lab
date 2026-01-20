@@ -12,7 +12,7 @@ The purpose of the app is that a user can create lists for gift ideas. Those gif
 - Should you want to do code review, all code is available :)
 ## Lesson
 This lab shows the danger of misconfiguration of jwt's
-- The jwt has a secret of `garfield`
+- The jwt has a secret of `poppy`
   - use of `hashcat` or `jwt_tool` for cracking
 - update role to `administrator`
 - resign it and get access to `/administrator`

@@ -8,7 +8,7 @@ const path = require('path');
 const app = express();
 
 // JWT Config
-const JWT_SECRET = "garfield"; 
+const JWT_SECRET = "poppy"; 
 const JWT_EXPIRES_IN = "2h";
 
 // Middleware
