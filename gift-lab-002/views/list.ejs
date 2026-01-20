@@ -44,8 +44,9 @@
             <% } else { %>
             <% items.forEach(item => { %>
             <li class="list-group-item d-flex justify-content-between align-items-center">
-              <strong><%= item.item_name %></strong>
-              <form action="/delete/<%= item.item_name %>/<%= list.id %>" method="POST" class="m-0">
+              <!-- ! Deliberately XSS vulnerable -->
+              <strong><%- item.item_name %></strong>
+              <form action="/delete/<%= item.id %>/<%= list.id %>" method="POST" class="m-0">
                 <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle" title="Delete item">
                   <i class="bi bi-trash"></i>
                 </button>
@@ -70,6 +71,39 @@
 
 <%- include('partials/footer') %>
 
+<% if (xssBypassDetected) { %>
+<!-- XSS Bypass Detection Modal -->
+<div class="modal fade" id="xssModal" tabindex="-1" data-bs-backdrop="static">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-danger">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title">
+          <i class="bi bi-exclamation-triangle-fill"></i> XSS Bypass Detected!
+        </h5>
+      </div>
+      <div class="modal-body text-center py-4">
+        <i class="bi bi-bug-fill text-danger" style="font-size: 4rem;"></i>
+        <h4 class="mt-3">Filter Bypassed!</h4>
+        <p class="text-muted mb-0">A malicious payload bypassed the XSS filter.</p>
+        <p class="text-muted">The filter only ran once, allowing nested payloads to slip through.</p>
+        <p class="text-muted"><%= flag %></p>
+      </div>
+      <div class="modal-footer justify-content-center">
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">I understand</button>
+      </div>
+    </div>
+  </div>
+</div>
+<% } %>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<% if (xssBypassDetected) { %>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    new bootstrap.Modal(document.getElementById('xssModal')).show();
+  });
+</script>
+<% } %>
 </body>
 </html>
