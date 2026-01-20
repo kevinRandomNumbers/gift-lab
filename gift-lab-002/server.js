@@ -213,9 +213,9 @@ function sanitize(input) {
   // Only check for bypass if the filter actually removed something
   const wasFiltered = input !== sanitizedInput;
   if (wasFiltered) {
-    const dangerousPatterns = /<script>|<img|<iframe|<svg|<body/i;
+    const dangerousPatterns = /<script>.*<\/script>|<img[^>]+onerror\s*=|<svg[^>]+onload\s*=|<body[^>]+onload\s*=|<iframe[^>]+src\s*=/i; 
     if (dangerousPatterns.test(sanitizedInput)) {
-      xssBypassDetected = true; // Show flag on `/share`
+      xssBypassDetected = true; // Show flag on `/share` and `/lists`
     }
   }
 
