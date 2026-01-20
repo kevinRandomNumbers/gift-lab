@@ -12,5 +12,5 @@ The purpose of the app is that a user can create lists for gift ideas. Those gif
 - Should you want to do code review, all code is available :)
 ## Lesson
 This lab shows the danger of misconfiguration of jwt's
-- The jwt does not verify the user claim, `admin` can be faked.
+- The jwt does not verify the user claim, `admin` or `jeremy` can be faked by their `id`.
 

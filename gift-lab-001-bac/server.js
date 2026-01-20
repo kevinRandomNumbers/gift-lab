@@ -73,9 +73,9 @@ db.serialize(() => {
   `);
 
   // Seed users
-  const adminPass = bcrypt.hashSync("BugForgeIsTheB3st!", 10);
+  const administratorPass = bcrypt.hashSync("BugForgeIsTheB3st!", 10);
 
-  db.run(`INSERT INTO users (username, password_hash) VALUES (?, ?)`, ["admin", adminPass]);
+  db.run(`INSERT INTO users (username, password_hash) VALUES (?, ?)`, ["administrator", administratorPass]);
   // Seed lists
   db.run(`INSERT INTO lists (user_id, title, share_token ) VALUES (1, 'Admin B-day', 'bGlzdFdpdGhJZC0x')`);
 
