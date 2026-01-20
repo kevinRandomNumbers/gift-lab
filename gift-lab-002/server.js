@@ -78,7 +78,7 @@ db.serialize(() => {
   // Seed users
   const adminPass = bcrypt.hashSync("admin", 10);
 
-  db.run(`INSERT INTO users (username, password_hash) VALUES (?, ?)`, ["admin", adminPass]);
+  db.run(`INSERT INTO users (username, password_hash) VALUES (?, ?)`, ["bugForg3isAwes0me", adminPass]);
   // Seed lists
   db.run(`INSERT INTO lists (user_id, title, share_token ) VALUES (1, 'Admin B-day', 'bGlzdFdpdGhJZC0x')`);
 
