@@ -73,17 +73,15 @@
                   <button type="submit" class="btn btn-sm btn-outline-success rounded-circle" title="View list">
                     <i class="bi bi-eye"></i>
                   </button>
-                </form>
-
-                <form action="/lists/<%= list.id %>/delete" method="POST" class="m-0">
-                  <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle" title="Delete list">
-                    <i class="bi bi-trash"></i>
-                  </button>
-                </form>
-
+                </form>                
                 <form action="/lists/<%= list.id %>/share" method="POST" class="m-0">
                   <button type="submit" class="btn btn-sm btn-outline-primary rounded-circle" title="Create share link">
                     <i class="bi bi-link-45deg"></i>
+                  </button>
+                </form>
+                <form action="/lists/<%= list.id %>/delete" method="POST" class="m-0">
+                  <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle" title="Delete list">
+                    <i class="bi bi-trash"></i>
                   </button>
                 </form>
               </div>

@@ -1,5 +1,5 @@
 const express = require('express');
-const sqlite3 = require('sqlite3').verbose();
+const sqlite3 = require('../gift-lab-004-jwt/node_modules/sqlite3/lib/sqlite3').verbose();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
@@ -8,11 +8,8 @@ const path = require('path');
 const app = express();
 
 // JWT Config
-const JWT_SECRET = "bugforge_gift_lab_001_2026";
+const JWT_SECRET = "bugforge_gift_lab_003_2026"; 
 const JWT_EXPIRES_IN = "2h";
-
-// XSS bypass detection flag
-let xssBypassDetected = false;
 
 // Middleware
 app.use(express.urlencoded({ extended: true }));
@@ -76,16 +73,19 @@ db.serialize(() => {
   `);
 
   // Seed users
-  const adminPass = bcrypt.hashSync("admin", 10);
+  const administratorPass = bcrypt.hashSync("BugForgeIsTheB3st!", 10);
+  const jeremyPass = bcrypt.hashSync("password", 10);
 
-  db.run(`INSERT INTO users (username, password_hash) VALUES (?, ?)`, ["bugForg3isAwes0me", adminPass]);
+  db.run(`INSERT INTO users (username, password_hash) VALUES (?, ?)`, ["administrator", administratorPass]);
+  db.run(`INSERT INTO users (username, password_hash) VALUES (?, ?)`, ["jeremy", jeremyPass]);
   // Seed lists
-  db.run(`INSERT INTO lists (user_id, title, share_token ) VALUES (1, 'Admin B-day', 'bGlzdFdpdGhJZC0x')`);
+  db.run(`INSERT INTO lists (user_id, title, share_token ) VALUES (1, 'Administrator B-day', 'zdy9xzep')`);
+  db.run(`INSERT INTO lists (user_id, title, share_token ) VALUES (2, 'Jeremy B-day', '7npsze5r')`);
 
   // Seed items
   db.run(`INSERT INTO list_items (list_id, item_name) VALUES (1, 'Mechanical keyboard')`);
   db.run(`INSERT INTO list_items (list_id, item_name) VALUES (1, 'Noise cancelling headphones')`);
-  db.run(`INSERT INTO list_items (list_id, item_name) VALUES (1, 'bug{0bscur3_i5_n0t_s3cur3}')`);
+  db.run(`INSERT INTO list_items (list_id, item_name) VALUES (2, 'bug{us3r_enum3rati0n}')`);
 });
 
 // Routes
@@ -93,7 +93,7 @@ db.serialize(() => {
 app.get('/', (req, res) => {
   const token = req.cookies.token;
   if (!token) return res.redirect('/register');
-
+  
   try {
     jwt.verify(token, JWT_SECRET);
     return res.redirect('/dashboard');
@@ -114,8 +114,12 @@ app.post('/login', (req, res) => {
   db.get(`SELECT * FROM users WHERE username = ?`, [username], (err, user) => {
     if (err) return res.status(500).send("Internal error.");
 
-    if (!user || !bcrypt.compareSync(password, user.password_hash)) {
-      return res.redirect('/login?error=invalid');
+    if (!user) {
+      return res.redirect('/login?error=invalidUser');
+    }
+
+    if (!bcrypt.compareSync(password, user.password_hash)) {
+      return res.redirect('/login?error=invalidPassword');
     }
 
     // Create JWT token
@@ -131,7 +135,7 @@ app.post('/login', (req, res) => {
       sameSite: "lax",
       path: "/"
     });
-
+    
     res.redirect('/dashboard');
   });
 });
@@ -154,10 +158,9 @@ app.get('/dashboard', requireLogin, (req, res) => {
 // View List
 app.get('/list/:id', requireLogin, (req, res) => {
   const listId = req.params.id;
-  const flag = "bug{n0_r3cursiv3_filt3r}";
 
   db.get(
-    `SELECT * FROM lists WHERE id = ? and user_id = ?`,
+    `SELECT * FROM lists WHERE id = ? and user_id = ?`, 
     [listId, req.user.id],
     (err, list) => {
       if (!list) {
@@ -168,7 +171,7 @@ app.get('/list/:id', requireLogin, (req, res) => {
         `SELECT * FROM list_items WHERE list_id = ?`,
         [listId],
         (err2, items) => {
-          res.render('list', { list, items, xssBypassDetected, flag });
+          res.render('list', { list, items });
         }
       );
     }
@@ -178,8 +181,8 @@ app.get('/list/:id', requireLogin, (req, res) => {
 // Add item to list
 app.post('/lists/:id/items/add', requireLogin, (req, res) => {
   const listId = req.params.id;
+  const item_name = req.body.new_item;
   const userId = req.user.id;
-  const item_name = sanitize(req.body.new_item)
 
   // Check ownership before inserting
   db.get(
@@ -201,27 +204,6 @@ app.post('/lists/:id/items/add', requireLogin, (req, res) => {
     });
 });
 
-// Basic XSS filtering
-function sanitize(input) {
-  const sanitizedInput = input
-    .replace(/<script>/i, '')
-    .replace(/<img/i, '')
-    .replace(/<iframe/i, '')
-    .replace(/<svg/i, '')
-    .replace(/<body/i, '');
-
-  // Only check for bypass if the filter actually removed something
-  const wasFiltered = input !== sanitizedInput;
-  if (wasFiltered) {
-    const dangerousPatterns = /<script>.*<\/script>|<img[^>]+onerror\s*=|<svg[^>]+onload\s*=|<body[^>]+onload\s*=|<iframe[^>]+src\s*=/i; 
-    if (dangerousPatterns.test(sanitizedInput)) {
-      xssBypassDetected = true; // Show flag on `/share` and `/lists`
-    }
-  }
-
-  return sanitizedInput;
-}
-
 // Create a list
 app.post('/lists', requireLogin, (req, res) => {
   const newList = req.body.new_list;
@@ -229,7 +211,6 @@ app.post('/lists', requireLogin, (req, res) => {
   db.run(
     `INSERT INTO lists (user_id, title) VALUES (?, ?)`,
     [req.user.id, newList],
-
     function (err) {
       if (err) {
         return res.redirect('/dashboard');
@@ -242,8 +223,8 @@ app.post('/lists', requireLogin, (req, res) => {
 // Delete list
 app.post('/lists/:id/delete', requireLogin, (req, res) => {
   const listId = req.params.id;
-  db.get('SELECT id FROM lists WHERE id = ? AND user_id = ?',
-    [listId, req.user.id],
+  db.get('SELECT id FROM lists WHERE id = ? AND user_id = ?', 
+    [listId, req.user.id], 
     (err, list) => {
       if (err || !list) {
         return res.status(403).send('Not your list');
@@ -260,7 +241,7 @@ app.post('/lists/:id/delete', requireLogin, (req, res) => {
 
 // Generate share link
 app.post('/lists/:id/share', requireLogin, (req, res) => {
-  const token = Math.random().toString(36).slice(2, 10); //* This is good enough for the lab
+  const token = Math.random().toString(36).slice(2, 10);
   const listId = req.params.id;
 
   db.run(
@@ -277,7 +258,6 @@ app.post('/lists/:id/share', requireLogin, (req, res) => {
 
 // Public shared list view
 app.get('/share/:token', (req, res) => {
-  const myFlag = "bug{n0_r3cursiv3_filt3r}"
   db.get(
     `SELECT * FROM lists WHERE share_token = ?`,
     [req.params.token],
@@ -288,7 +268,7 @@ app.get('/share/:token', (req, res) => {
         `SELECT * FROM list_items WHERE list_id = ?`,
         [list.id],
         (err2, items) => {
-          res.render('share', { list, items, xssBypassDetected, flag: myFlag});
+          res.render('share', { list, items });
         }
       );
     }
@@ -311,8 +291,8 @@ app.post('/delete/:item_id/:list_id', requireLogin, (req, res) => {
       if (refererUrl.host === host) {
         backUrl = refererUrl.pathname;
       }
-    } catch (e) {
-      // Invalid URL, use default
+    } catch (err) {
+      console.log(err)
     }
   }
 

@@ -1,5 +1,5 @@
 const express = require('express');
-const sqlite3 = require('sqlite3').verbose();
+const sqlite3 = require('../gift-lab-004-jwt/node_modules/sqlite3/lib/sqlite3').verbose();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
@@ -255,7 +255,6 @@ app.post('/lists/:id/share', requireLogin, (req, res) => {
 
 // Public shared list view
 app.get('/share/:token', (req, res) => {
-  //! Deliberately not checking the user_id so the exploit explained in `/lists/:id/share` works
   db.get(
     `SELECT * FROM lists WHERE share_token = ?`,
     [req.params.token],

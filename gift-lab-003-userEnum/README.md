@@ -10,14 +10,9 @@ The purpose of the app is that a user can create lists for gift ideas. Those gif
 ## How to use it
 - If you want to learn black box testing, run the app and hack away.
 - Should you want to do code review, all code is available :)
-## Status lab
-- This lab is vulnerable to XSS on the `/share` and `/list` page.
-- A student will get visual feedback on the filter.
-- Filter is not recursive, but will filter once on
-  - `<img`
-  - `<script>`
-  - `<iframe`
-  - `<svg`
-  - `<body`
-- Once the filter is bypassed, the payload will execute and the student gets the flag.
+## Lesson
+This lab shows the danger of user enumeration combined with the lack of ratelimiting on a login screen.
+- users in the database
+  - administrator
+  - jeremy
 

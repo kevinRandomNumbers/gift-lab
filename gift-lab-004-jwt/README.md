@@ -10,6 +10,7 @@ The purpose of the app is that a user can create lists for gift ideas. Those gif
 ## How to use it
 - If you want to learn black box testing, run the app and hack away.
 - Should you want to do code review, all code is available :)
-## Status lab
-Under construction, just a copy of lab 1 atm.
+## Lesson
+This lab shows the danger of misconfiguration of jwt's
+- The jwt does not verify the user claim, `admin` can be faked.
 
