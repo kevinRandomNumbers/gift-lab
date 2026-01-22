@@ -300,9 +300,11 @@ app.get('/logout', (req, res) => {
 });
 
 // Admin
+const ADMIN_FLAG = "bug{un5af3_s3cr3ts}";
+
 app.get("/administrator", requireLogin, (req, res) => {
   if(req.user.role === "administrator"){
-    res.render("administrator")
+    res.render("administrator", { flag: ADMIN_FLAG })
   } else {
     res.render("denied")
   }
