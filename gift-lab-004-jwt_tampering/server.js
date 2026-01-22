@@ -104,13 +104,13 @@ async function initDb() {
   `);
 
   // Seed users
-  const administratorPass = bcrypt.hashSync("BugForgeIsTheB3st!", 10);
+  const jessamyPass = bcrypt.hashSync("BugForgeIsTheB3st!", 10);
   const jeremyPass = bcrypt.hashSync("password", 10);
 
-  dbRun(`INSERT INTO users (username, password_hash) VALUES (?, ?)`, ["administrator", administratorPass]);
+  dbRun(`INSERT INTO users (username, password_hash) VALUES (?, ?)`, ["jessamy", jessamyPass]);
   dbRun(`INSERT INTO users (username, password_hash) VALUES (?, ?)`, ["jeremy", jeremyPass]);
   // Seed lists
-  db.run(`INSERT INTO lists (user_id, title, share_token ) VALUES (1, 'Administrator B-day', 'zdy9xzep')`);
+  db.run(`INSERT INTO lists (user_id, title, share_token ) VALUES (1, 'Jessamy B-day', 'zdy9xzep')`);
   db.run(`INSERT INTO lists (user_id, title, share_token ) VALUES (2, 'Jeremy B-day', '7npsze5r')`);
 
   // Seed items

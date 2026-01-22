@@ -299,15 +299,6 @@ app.get('/logout', (req, res) => {
   res.redirect('/login');
 });
 
-// Admin
-app.get("/administrator", requireLogin, (req, res) => {
-  if(req.user.role === "administrator"){
-    res.render("administrator")
-  } else {
-    res.render("denied")
-  }
-})
-
 // Server
 const PORT = process.env.PORT || 3000;
 
