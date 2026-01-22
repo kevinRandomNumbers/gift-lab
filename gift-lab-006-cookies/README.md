@@ -17,5 +17,6 @@ The purpose of the app is that a user can create lists for gift ideas. Those gif
 - The student needs to decode the session token
   - find out through `sequencer`that only the suffix changes
   - create a bruteforce attack on `/administrator`
+  - The base64 decoded string is `bugforge-rls` or in encoded form: `YnVnZm9yZ2Utcmxz`
 - Access `/administrator` once the token is valid and read the flag.
 

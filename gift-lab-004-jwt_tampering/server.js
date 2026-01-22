@@ -8,7 +8,7 @@ const path = require('path');
 const app = express();
 
 // JWT Config
-const JWT_SECRET = "bugforge_gift_lab_003_2026";
+const JWT_SECRET = "bugforge_gift_lab_004_2026";
 const JWT_EXPIRES_IN = "2h";
 
 // Middleware
@@ -105,7 +105,7 @@ async function initDb() {
 
   // Seed users
   const jessamyPass = bcrypt.hashSync("BugForgeIsTheB3st!", 10);
-  const jeremyPass = bcrypt.hashSync("password", 10);
+  const jeremyPass = bcrypt.hashSync("BugForgeIsTheB3st!", 10);
 
   dbRun(`INSERT INTO users (username, password_hash) VALUES (?, ?)`, ["jessamy", jessamyPass]);
   dbRun(`INSERT INTO users (username, password_hash) VALUES (?, ?)`, ["jeremy", jeremyPass]);

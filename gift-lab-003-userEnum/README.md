@@ -15,4 +15,5 @@ This lab shows the danger of user enumeration combined with the lack of ratelimi
 - users in the database
   - administrator
   - jeremy
+- Jeremy has an easy guessable password, `password` 
 

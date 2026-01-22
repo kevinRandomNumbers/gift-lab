@@ -8,7 +8,7 @@ const path = require('path');
 const app = express();
 
 // JWT Config
-const JWT_SECRET = "bugforge_gift_lab_006_2026";
+const JWT_SECRET = "bugforge_gift_lab_002_2026";
 const JWT_EXPIRES_IN = "2h";
 
 // Middleware

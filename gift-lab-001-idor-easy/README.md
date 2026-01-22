@@ -14,12 +14,7 @@ The purpose of the app is that a user can create lists for gift ideas. Those gif
 Security through obscurity is **not** security.
 ### Walkthrough
 - When a user clicks the `share` button, a token is generated and stored in the database.
-- This token consists out of two parts:
-  - The base string `listWithId-`
-  - The suffix which is the ID of the list.
-- This string is Base64 encoded.
-- A player must discover the Base64 nature of the share token.
-- "Decrypt" it.
-- Create their own Base64 encoded `listWithId-1`
-- See the flag on the Admin's B-day list.
+- The 'token' is just the id
+- When navigating to `/share/:id` there is no unguessable id so you can see/adapt all lists that exist inside the app.
+- 
 
