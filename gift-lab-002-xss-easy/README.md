@@ -11,5 +11,7 @@ The purpose of the app is that a user can create lists for gift ideas. Those gif
 - If you want to learn black box testing, run the app and hack away.
 - Should you want to do code review, all code is available :)
 ## Lesson
-Clean lab for now, vuln to be implemented.
+- This lab is vulnerable to an easy XSS (no filter, basic `<script>` or `<img>` will do).
+- The vulnerability is only on the `share` page. This would make the most sense as you share that page with other people.
+
 
