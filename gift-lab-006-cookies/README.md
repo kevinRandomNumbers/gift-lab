@@ -11,9 +11,11 @@ The purpose of the app is that a user can create lists for gift ideas. Those gif
 - If you want to learn black box testing, run the app and hack away.
 - Should you want to do code review, all code is available :)
 ## Lesson
-This lab shows the danger of misconfiguration of jwt's
-- The jwt has a secret of `poppy`
-  - use of `hashcat` or `jwt_tool` for cracking
-- update role to `administrator`
-- resign it and get access to `/administrator`
+- This lab shows the danger of weak tokens
+  - A base64 token is created on login with the format `bugforge-3_letter_suffix`
+- The student can fuzz the application and find the endpoint `/administrator`
+- The student needs to decode the session token
+  - find out through `sequencer`that only the suffix changes
+  - create a bruteforce attack on `/administrator`
+- Access `/administrator` once the token is valid and read the flag.
 
