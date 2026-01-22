@@ -1,0 +1,257 @@
+<!-- views/partials/header.ejs -->
+<style>
+  :root {
+    --gift-primary: #1a237e;
+    --gift-primary-dark: #0d1642;
+    --gift-accent: #ffd54f;
+    --gift-accent-light: #ffecb3;
+    --gift-background: #f8f9fc;
+    --gift-text: #2c3e50;
+  }
+
+  body {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    min-height: 100vh;
+  }
+
+  /* Navbar styling */
+  .navbar-festive {
+    background: linear-gradient(135deg, var(--gift-primary-dark) 0%, var(--gift-primary) 100%) !important;
+    box-shadow: 0 4px 15px rgba(13, 22, 66, 0.3);
+  }
+
+  .navbar-festive .navbar-brand {
+    font-weight: 700;
+    font-size: 1.4rem;
+    color: var(--gift-accent) !important;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+    transition: transform 0.2s ease;
+  }
+
+  .navbar-festive .navbar-brand:hover {
+    transform: scale(1.05);
+    color: #fff !important;
+  }
+
+  .navbar-festive .navbar-brand i {
+    color: var(--gift-accent);
+  }
+
+  .navbar-festive .nav-link {
+    color: rgba(255,255,255,0.9) !important;
+    font-weight: 500;
+    transition: all 0.2s ease;
+  }
+
+  .navbar-festive .nav-link:hover {
+    color: var(--gift-accent) !important;
+    transform: translateY(-1px);
+  }
+
+  /* Card styling */
+  .card-festive {
+    border: none !important;
+    border-radius: 16px !important;
+    box-shadow: 0 10px 40px rgba(26, 35, 126, 0.1), 0 4px 12px rgba(0,0,0,0.05);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background-color: #fff !important;
+  }
+
+  .card-festive:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 15px 50px rgba(26, 35, 126, 0.15), 0 8px 20px rgba(0,0,0,0.08);
+  }
+
+  .card-festive .card-body {
+    background-color: #fff;
+  }
+
+  .card-header-festive {
+    background: linear-gradient(135deg, var(--gift-primary-dark) 0%, var(--gift-primary) 100%) !important;
+    border-bottom: 3px solid var(--gift-accent) !important;
+    padding: 1.25rem !important;
+  }
+
+  .card-header-festive h1,
+  .card-header-festive h4 {
+    color: #fff;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+  }
+
+  .card-header-festive i {
+    color: var(--gift-accent);
+  }
+
+  /* Button styling */
+  .btn-festive {
+    background: linear-gradient(135deg, var(--gift-primary) 0%, var(--gift-primary-dark) 100%);
+    border: none;
+    color: #fff;
+    font-weight: 600;
+    padding: 0.6rem 1.5rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(26, 35, 126, 0.3);
+  }
+
+  .btn-festive:hover {
+    background: linear-gradient(135deg, var(--gift-primary-dark) 0%, #060a21 100%);
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(26, 35, 126, 0.4);
+  }
+
+  .btn-festive-outline {
+    background: transparent;
+    border: 2px solid var(--gift-primary);
+    color: var(--gift-primary);
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+
+  .btn-festive-outline:hover {
+    background: var(--gift-primary);
+    color: #fff;
+    transform: translateY(-2px);
+  }
+
+  /* Form styling */
+  .form-control {
+    background-color: #fafbfd;
+  }
+
+  .form-control:focus {
+    border-color: var(--gift-accent);
+    box-shadow: 0 0 0 0.2rem rgba(255, 213, 79, 0.25);
+    background-color: #fff;
+  }
+
+  .form-floating label {
+    color: var(--gift-text);
+  }
+
+  .input-group-text {
+    background: linear-gradient(135deg, var(--gift-accent-light) 0%, var(--gift-accent) 100%);
+    border-color: var(--gift-accent);
+    color: var(--gift-primary-dark);
+  }
+
+  /* List items */
+  .list-group-item {
+    border-left: none;
+    border-right: none;
+    transition: all 0.2s ease;
+    background-color: #fff;
+  }
+
+  .list-group-item:hover {
+    background-color: rgba(255, 213, 79, 0.1);
+  }
+
+  .list-group-item strong {
+    color: var(--gift-text);
+  }
+
+  /* Action buttons */
+  .btn-outline-success {
+    border-color: #198754;
+    color: #198754;
+  }
+
+  .btn-outline-danger {
+    border-color: #dc3545;
+    color: #dc3545;
+  }
+
+  .btn-outline-danger:hover {
+    background-color: #dc3545;
+    border-color: #dc3545;
+  }
+
+  .btn-outline-primary {
+    border-color: var(--gift-primary);
+    color: var(--gift-primary);
+  }
+
+  .btn-outline-primary:hover {
+    background-color: var(--gift-primary);
+    border-color: var(--gift-primary);
+    color: #fff;
+  }
+
+  /* Links */
+  a {
+    color: var(--gift-primary);
+    transition: color 0.2s ease;
+  }
+
+  a:hover {
+    color: var(--gift-primary-dark);
+  }
+
+  /* Toast customization */
+  .toast.text-bg-success {
+    background: linear-gradient(135deg, #198754 0%, #146c43 100%) !important;
+  }
+
+  /* Footer will have its own styling */
+  .footer-festive {
+    background: linear-gradient(135deg, var(--gift-primary) 0%, var(--gift-primary-dark) 100%);
+    border-top: 3px solid var(--gift-accent) !important;
+  }
+
+  .footer-festive span {
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  .footer-festive i {
+    color: var(--gift-accent);
+  }
+
+  /* Empty state styling */
+  .text-muted {
+    color: #6c7a89 !important;
+  }
+
+  /* Code/share token styling */
+  code {
+    color: var(--gift-primary-dark);
+    padding: 0.2em 0.5em;
+    border-radius: 4px;
+    font-size: 0.85em;
+  }
+
+  /* Badge styling */
+  .badge.bg-success {
+    background: linear-gradient(135deg, #198754 0%, #146c43 100%) !important;
+  }
+</style>
+
+<nav class="navbar navbar-expand-lg navbar-dark navbar-festive">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="/dashboard"><i class="bi bi-gift-fill"></i> Gift List</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        <% if (typeof currentUser !== 'undefined' && currentUser) { %>
+          <li class="nav-item">
+            <span class="nav-link"><i class="bi bi-person-circle"></i> <%= currentUser.username %></span>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/logout"><i class="bi bi-box-arrow-right"></i> Logout</a>
+          </li>
+        <% } else { %>
+          <li class="nav-item">
+            <a class="nav-link" href="/login">Login</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/register">Register</a>
+          </li>
+        <% } %>
+      </ul>
+    </div>
+  </div>
+</nav>
