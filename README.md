@@ -5,5 +5,5 @@ The purpose of the app is that a user can create lists for gift ideas. Those gif
 ## Remarks
 - Please note that the database is in memory, so all data is lost after the application has been closed.
 - **This is a work in progress, noise in the responses, unintended vulns are part of my journey and I promise to make it as good as possible.**
-- You are free to use, edit this application as you wish.
+- You are free to use and edit this application as you wish.
 
