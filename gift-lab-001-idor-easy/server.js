@@ -8,9 +8,8 @@ const path = require('path');
 const app = express();
 
 // JWT Config
-const JWT_SECRET = "bugforge_gift_lab_002_2026";
+const JWT_SECRET = "bugforge_gift_lab_001_2026";
 const JWT_EXPIRES_IN = "2h";
-let xssBypassDetected = false;
 
 // Middleware
 app.use(express.urlencoded({ extended: true }));
@@ -102,6 +101,18 @@ async function initDb() {
       FOREIGN KEY(list_id) REFERENCES lists(id)
     )
   `);
+
+  // Seed users
+  const administratorPass = bcrypt.hashSync("BugForgeIsTheB3st!", 10);
+
+  dbRun(`INSERT INTO users (username, password_hash) VALUES (?, ?)`, ["administrator", administratorPass]);
+  // Seed lists
+  db.run(`INSERT INTO lists (user_id, title, share_token ) VALUES (1, 'Admin B-day', '1')`);
+
+  // Seed items
+  db.run(`INSERT INTO list_items (list_id, item_name) VALUES (1, 'Mechanical keyboard')`);
+  db.run(`INSERT INTO list_items (list_id, item_name) VALUES (1, 'Noise cancelling headphones')`);
+  db.run(`INSERT INTO list_items (list_id, item_name) VALUES (1, 'bug{0bscur3_i5_n0t_s3cur3}')`);
 }
 
 // Routes
@@ -160,7 +171,6 @@ app.get('/dashboard', requireLogin, (req, res) => {
 // View List
 app.get('/list/:id', requireLogin, (req, res) => {
   const listId = req.params.id;
-  const flag = "bug{n0_r3cursiv3_filt3r}";
 
   const list = dbGet(`SELECT * FROM lists WHERE id = ? and user_id = ?`, [listId, req.user.id]);
   if (!list) {
@@ -168,14 +178,14 @@ app.get('/list/:id', requireLogin, (req, res) => {
   }
 
   const items = dbAll(`SELECT * FROM list_items WHERE list_id = ?`, [listId]);
-  res.render('list', { list, items, xssBypassDetected, flag });
+  res.render('list', { list, items });
 });
 
 // Add item to list
 app.post('/lists/:id/items/add', requireLogin, (req, res) => {
   const listId = req.params.id;
+  const item_name = req.body.new_item;
   const userId = req.user.id;
-  const item_name = sanitize(req.body.new_item)
 
   // Check ownership before inserting
   const list = dbGet(`SELECT id FROM lists WHERE id = ? AND user_id = ?`, [listId, userId]);
@@ -186,26 +196,6 @@ app.post('/lists/:id/items/add', requireLogin, (req, res) => {
   dbRun(`INSERT INTO list_items (list_id, item_name) values (?, ?)`, [listId, item_name]);
   res.redirect(`/list/${listId}`);
 });
-
-// Basic XSS filtering
-function sanitize(input) {
-  const sanitizedInput = input
-    .replace(/<script>/i, '')
-    .replace(/<img/i, '')
-    .replace(/<iframe/i, '')
-    .replace(/<svg/i, '')
-    .replace(/<body/i, '');
-
-  // Only check for bypass if the filter actually removed something
-  const wasFiltered = input !== sanitizedInput;
-  if (wasFiltered) {
-    const dangerousPatterns = /<script>.*<\/script>|<img[^>]+onerror\s*=|<svg[^>]+onload\s*=|<body[^>]+onload\s*=|<iframe[^>]+src\s*=/i;
-    if (dangerousPatterns.test(sanitizedInput)) {
-      xssBypassDetected = true; // Show flag on `/share` and `/lists`
-    }
-  }
-  return sanitizedInput;
-}
 
 // Create a list
 app.post('/lists', requireLogin, (req, res) => {
@@ -229,21 +219,19 @@ app.post('/lists/:id/delete', requireLogin, (req, res) => {
 
 // Generate share link
 app.post('/lists/:id/share', requireLogin, (req, res) => {
-  const token = Math.random().toString(36).slice(2, 10); //* This is good enough for the lab
+  //! This part is deliberately vulnerable. An easy IDOR vuln on the share
   const listId = req.params.id;
-
-  dbRun(`UPDATE lists SET share_token = ? WHERE id = ? AND user_id = ?`, [token, listId, req.user.id]);
+  dbRun(`UPDATE lists SET share_token = ? WHERE id = ? AND user_id = ?`, [listId, listId, req.user.id]);
   res.redirect(`/dashboard?shared=shared`);
 });
 
 // Public shared list view
 app.get('/share/:token', (req, res) => {
-  const myFlag = "bug{n0_r3cursiv3_filt3r}"
   const list = dbGet(`SELECT * FROM lists WHERE share_token = ?`, [req.params.token]);
   if (!list) return res.status(404).send("Not found.");
 
   const items = dbAll(`SELECT * FROM list_items WHERE list_id = ?`, [list.id]);
-  res.render('share', { list, items, xssBypassDetected, flag: myFlag });
+  res.render('share', { list, items });
 });
 
 // Delete item
@@ -262,8 +250,8 @@ app.post('/delete/:item_id/:list_id', requireLogin, (req, res) => {
       if (refererUrl.host === host) {
         backUrl = refererUrl.pathname;
       }
-    } catch (err) {
-      console.log(err)
+    } catch (e) {
+      // Invalid URL, use default
     }
   }
 

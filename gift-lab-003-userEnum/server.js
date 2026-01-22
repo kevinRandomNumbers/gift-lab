@@ -1,5 +1,5 @@
 const express = require('express');
-const sqlite3 = require('../gift-lab-004-jwt/node_modules/sqlite3/lib/sqlite3').verbose();
+const initSqlJs = require('sql.js');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
@@ -8,7 +8,7 @@ const path = require('path');
 const app = express();
 
 // JWT Config
-const JWT_SECRET = "bugforge_gift_lab_003_2026"; 
+const JWT_SECRET = "bugforge_gift_lab_003_2026";
 const JWT_EXPIRES_IN = "2h";
 
 // Middleware
@@ -25,6 +25,35 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Database instance (initialized async)
+let db;
+
+// Helper functions for sql.js
+function dbRun(sql, params = []) {
+  const stmt = db.prepare(sql);
+  stmt.bind(params);
+  stmt.step();
+  stmt.free();
+}
+
+function dbGet(sql, params = []) {
+  const stmt = db.prepare(sql);
+  stmt.bind(params);
+  const result = stmt.step() ? stmt.getAsObject() : null;
+  stmt.free();
+  return result;
+}
+
+function dbAll(sql, params = []) {
+  const stmt = db.prepare(sql);
+  stmt.bind(params);
+  const results = [];
+  while (stmt.step()) {
+    results.push(stmt.getAsObject());
+  }
+  stmt.free();
+  return results;
+}
 
 // JWT middleware
 function requireLogin(req, res, next) {
@@ -41,10 +70,11 @@ function requireLogin(req, res, next) {
   }
 }
 
-// DB in memory
-const db = new sqlite3.Database(':memory:');
+// Initialize database
+async function initDb() {
+  const SQL = await initSqlJs();
+  db = new SQL.Database();
 
-db.serialize(() => {
   db.run(`
     CREATE TABLE users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -76,8 +106,8 @@ db.serialize(() => {
   const administratorPass = bcrypt.hashSync("BugForgeIsTheB3st!", 10);
   const jeremyPass = bcrypt.hashSync("password", 10);
 
-  db.run(`INSERT INTO users (username, password_hash) VALUES (?, ?)`, ["administrator", administratorPass]);
-  db.run(`INSERT INTO users (username, password_hash) VALUES (?, ?)`, ["jeremy", jeremyPass]);
+  dbRun(`INSERT INTO users (username, password_hash) VALUES (?, ?)`, ["administrator", administratorPass]);
+  dbRun(`INSERT INTO users (username, password_hash) VALUES (?, ?)`, ["jeremy", jeremyPass]);
   // Seed lists
   db.run(`INSERT INTO lists (user_id, title, share_token ) VALUES (1, 'Administrator B-day', 'zdy9xzep')`);
   db.run(`INSERT INTO lists (user_id, title, share_token ) VALUES (2, 'Jeremy B-day', '7npsze5r')`);
@@ -86,14 +116,14 @@ db.serialize(() => {
   db.run(`INSERT INTO list_items (list_id, item_name) VALUES (1, 'Mechanical keyboard')`);
   db.run(`INSERT INTO list_items (list_id, item_name) VALUES (1, 'Noise cancelling headphones')`);
   db.run(`INSERT INTO list_items (list_id, item_name) VALUES (2, 'bug{us3r_enum3rati0n}')`);
-});
+}
 
 // Routes
 
 app.get('/', (req, res) => {
   const token = req.cookies.token;
   if (!token) return res.redirect('/register');
-  
+
   try {
     jwt.verify(token, JWT_SECRET);
     return res.redirect('/dashboard');
@@ -111,71 +141,52 @@ app.get('/login', (req, res) => {
 app.post('/login', (req, res) => {
   const { username, password } = req.body;
 
-  db.get(`SELECT * FROM users WHERE username = ?`, [username], (err, user) => {
-    if (err) return res.status(500).send("Internal error.");
+  const user = dbGet(`SELECT * FROM users WHERE username = ?`, [username]);
 
-    if (!user) {
-      return res.redirect('/login?error=invalidUser');
-    }
+  //! Vulnerable: different error messages allow user enumeration
+  if (!user) {
+    return res.redirect('/login?error=invalidUser');
+  }
 
-    if (!bcrypt.compareSync(password, user.password_hash)) {
-      return res.redirect('/login?error=invalidPassword');
-    }
+  if (!bcrypt.compareSync(password, user.password_hash)) {
+    return res.redirect('/login?error=invalidPassword');
+  }
 
-    // Create JWT token
-    const token = jwt.sign(
-      { id: user.id, username: user.username },
-      JWT_SECRET,
-      { expiresIn: JWT_EXPIRES_IN }
-    );
+  // Create JWT token
+  const token = jwt.sign(
+    { id: user.id, username: user.username },
+    JWT_SECRET,
+    { expiresIn: JWT_EXPIRES_IN }
+  );
 
-    // Set token in cookie
-    res.cookie("token", token, {
-      httpOnly: true,
-      sameSite: "lax",
-      path: "/"
-    });
-    
-    res.redirect('/dashboard');
+  // Set token in cookie
+  res.cookie("token", token, {
+    httpOnly: true,
+    sameSite: "lax",
+    path: "/"
   });
+
+  res.redirect('/dashboard');
 });
 
 // Dashboard
 app.get('/dashboard', requireLogin, (req, res) => {
   const shared = req.query.shared;
-  db.all(
-    `SELECT * FROM lists WHERE user_id = ? ORDER BY id DESC`,
-    [req.user.id],
-    (err, lists) => {
-      if (err) {
-        return res.redirect('/login');
-      }
-      res.render('dashboard', { lists, shared });
-    }
-  );
+  const lists = dbAll(`SELECT * FROM lists WHERE user_id = ? ORDER BY id DESC`, [req.user.id]);
+  res.render('dashboard', { lists, shared });
 });
 
 // View List
 app.get('/list/:id', requireLogin, (req, res) => {
   const listId = req.params.id;
 
-  db.get(
-    `SELECT * FROM lists WHERE id = ? and user_id = ?`, 
-    [listId, req.user.id],
-    (err, list) => {
-      if (!list) {
-        return res.redirect('/dashboard');
-      }
+  const list = dbGet(`SELECT * FROM lists WHERE id = ? and user_id = ?`, [listId, req.user.id]);
+  if (!list) {
+    return res.redirect('/dashboard');
+  }
 
-      db.all(
-        `SELECT * FROM list_items WHERE list_id = ?`,
-        [listId],
-        (err2, items) => {
-          res.render('list', { list, items });
-        }
-      );
-    }
-  );
+  const items = dbAll(`SELECT * FROM list_items WHERE list_id = ?`, [listId]);
+  res.render('list', { list, items });
 });
 
 // Add item to list
@@ -185,58 +196,33 @@ app.post('/lists/:id/items/add', requireLogin, (req, res) => {
   const userId = req.user.id;
 
   // Check ownership before inserting
-  db.get(
-    `SELECT id FROM lists WHERE id = ? AND user_id = ?`,
-    [listId, userId],
-    (err, list) => {
-      if (err) {
-        return res.status(500).send("DB error");
-      }
-      if (!list) {
-        return res.status(403).send("Nice try. That's not your list.");
-      }
-      // Insert into db only after ownership is verified
-      db.run(
-        `INSERT INTO list_items (list_id, item_name) values (?, ?)`,
-        [listId, item_name],
-        () => res.redirect(`/list/${listId}`)
-      );
-    });
+  const list = dbGet(`SELECT id FROM lists WHERE id = ? AND user_id = ?`, [listId, userId]);
+  if (!list) {
+    return res.status(403).send("Nice try. That's not your list.");
+  }
+  // Insert into db only after ownership is verified
+  dbRun(`INSERT INTO list_items (list_id, item_name) values (?, ?)`, [listId, item_name]);
+  res.redirect(`/list/${listId}`);
 });
 
 // Create a list
 app.post('/lists', requireLogin, (req, res) => {
   const newList = req.body.new_list;
-
-  db.run(
-    `INSERT INTO lists (user_id, title) VALUES (?, ?)`,
-    [req.user.id, newList],
-    function (err) {
-      if (err) {
-        return res.redirect('/dashboard');
-      }
-      res.redirect('/dashboard');
-    }
-  );
+  dbRun(`INSERT INTO lists (user_id, title) VALUES (?, ?)`, [req.user.id, newList]);
+  res.redirect('/dashboard');
 });
 
 // Delete list
 app.post('/lists/:id/delete', requireLogin, (req, res) => {
   const listId = req.params.id;
-  db.get('SELECT id FROM lists WHERE id = ? AND user_id = ?', 
-    [listId, req.user.id], 
-    (err, list) => {
-      if (err || !list) {
-        return res.status(403).send('Not your list');
-      }
+  const list = dbGet('SELECT id FROM lists WHERE id = ? AND user_id = ?', [listId, req.user.id]);
+  if (!list) {
+    return res.status(403).send('Not your list');
+  }
 
-      db.run('DELETE FROM list_items WHERE list_id = ?', [listId], (err) => {
-        db.run('DELETE FROM lists WHERE id = ?', [listId], (err) => {
-          res.redirect('/dashboard');
-        });
-      });
-    }
-  );
+  dbRun('DELETE FROM list_items WHERE list_id = ?', [listId]);
+  dbRun('DELETE FROM lists WHERE id = ?', [listId]);
+  res.redirect('/dashboard');
 });
 
 // Generate share link
@@ -244,35 +230,17 @@ app.post('/lists/:id/share', requireLogin, (req, res) => {
   const token = Math.random().toString(36).slice(2, 10);
   const listId = req.params.id;
 
-  db.run(
-    `UPDATE lists SET share_token = ? WHERE id = ? AND user_id = ?`,
-    [token, listId, req.user.id],
-    function (err) {
-      if (err || this.changes === 0) {
-        console.log("error creating link")
-      }
-      res.redirect(`/dashboard?shared=shared`);
-    }
-  );
+  dbRun(`UPDATE lists SET share_token = ? WHERE id = ? AND user_id = ?`, [token, listId, req.user.id]);
+  res.redirect(`/dashboard?shared=shared`);
 });
 
 // Public shared list view
 app.get('/share/:token', (req, res) => {
-  db.get(
-    `SELECT * FROM lists WHERE share_token = ?`,
-    [req.params.token],
-    (err, list) => {
-      if (!list) return res.status(404).send("Not found.");
+  const list = dbGet(`SELECT * FROM lists WHERE share_token = ?`, [req.params.token]);
+  if (!list) return res.status(404).send("Not found.");
 
-      db.all(
-        `SELECT * FROM list_items WHERE list_id = ?`,
-        [list.id],
-        (err2, items) => {
-          res.render('share', { list, items });
-        }
-      );
-    }
-  );
+  const items = dbAll(`SELECT * FROM list_items WHERE list_id = ?`, [list.id]);
+  res.render('share', { list, items });
 });
 
 // Delete item
@@ -297,18 +265,12 @@ app.post('/delete/:item_id/:list_id', requireLogin, (req, res) => {
   }
 
   // Verify ownership before deleting
-  db.get(
-    `SELECT id FROM lists WHERE id = ? AND user_id = ?`,
-    [list_id, req.user.id],
-    (err, list) => {
-      if (err || !list) {
-        return res.status(403).send("Nice try. That's not your list.");
-      }
-      db.run(`DELETE FROM list_items WHERE id = ? AND list_id = ?`, [item_id, list_id], () => {
-        res.redirect(backUrl);
-      });
-    }
-  );
+  const list = dbGet(`SELECT id FROM lists WHERE id = ? AND user_id = ?`, [list_id, req.user.id]);
+  if (!list) {
+    return res.status(403).send("Nice try. That's not your list.");
+  }
+  dbRun(`DELETE FROM list_items WHERE id = ? AND list_id = ?`, [item_id, list_id]);
+  res.redirect(backUrl);
 });
 
 // Register
@@ -325,31 +287,14 @@ app.post('/register', (req, res) => {
   }
 
   // Check if username already exists
-  db.get(
-    `SELECT id FROM users WHERE username = ?`,
-    [username],
-    (err, existingUser) => {
-      if (err) {
-        return res.redirect('/register');
-      }
+  const existingUser = dbGet(`SELECT id FROM users WHERE username = ?`, [username]);
+  if (existingUser) {
+    return res.redirect('/register?error=exists');
+  }
 
-      if (existingUser) {
-        return res.redirect('/register?error=exists');
-      }
-
-      const hash = bcrypt.hashSync(password, 10);
-      db.run(
-        `INSERT INTO users (username, password_hash) VALUES (?, ?)`,
-        [username, hash],
-        function (err) {
-          if (err) {
-            return res.redirect('/register');
-          }
-          res.redirect('/login');
-        }
-      );
-    }
-  );
+  const hash = bcrypt.hashSync(password, 10);
+  dbRun(`INSERT INTO users (username, password_hash) VALUES (?, ?)`, [username, hash]);
+  res.redirect('/login');
 });
 
 // Logout
@@ -360,6 +305,12 @@ app.get('/logout', (req, res) => {
 
 // Server
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Gift Lab running on http://localhost:${PORT}`);
+
+initDb().then(() => {
+  app.listen(PORT, () => {
+    console.log(`Gift Lab running on http://localhost:${PORT}`);
+  });
+}).catch(err => {
+  console.error('Failed to initialize database:', err);
+  process.exit(1);
 });
