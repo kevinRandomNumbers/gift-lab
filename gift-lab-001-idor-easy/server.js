@@ -112,7 +112,7 @@ async function initDb() {
   // Seed items
   db.run(`INSERT INTO list_items (list_id, item_name) VALUES (1, 'Mechanical keyboard')`);
   db.run(`INSERT INTO list_items (list_id, item_name) VALUES (1, 'Noise cancelling headphones')`);
-  db.run(`INSERT INTO list_items (list_id, item_name) VALUES (1, 'bug{0bscur3_i5_n0t_s3cur3}')`);
+  db.run(`INSERT INTO list_items (list_id, item_name) VALUES (1, 'bug{your_ID0R_bug}')`);
 }
 
 // Routes
